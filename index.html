@@ -215,24 +215,29 @@
         
         .programs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
         }
         
         .program-card {
             background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
             align-items: center;
             gap: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .program-card:hover {
+            transform: translateX(4px);
         }
         
         .program-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -241,19 +246,32 @@
         }
         
         .program-card h3 {
-            font-size: 17px;
+            font-size: 16px;
             margin-bottom: 4px;
         }
         
         .program-card p {
             font-size: 14px;
             color: var(--text-secondary);
+            margin: 0;
         }
         
         .program-free {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 2px 8px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 4px;
             font-size: 12px;
-            color: #10b981;
-            font-weight: 600;
+            font-weight: 500;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .program-free {
+                background: #166534;
+                color: #dcfce7;
+            }
         }
         
         /* CTA */
@@ -264,13 +282,12 @@
         
         .cta h2 {
             font-size: 36px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         
         .cta p {
             color: var(--text-secondary);
-            margin-bottom: 40px;
-            font-size: 18px;
+            margin-bottom: 32px;
         }
         
         /* Footer */
@@ -305,6 +322,18 @@
         .copyright {
             color: var(--text-secondary);
             font-size: 14px;
+        }
+        
+        /* Disclaimer */
+        .disclaimer {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
         }
         
         /* Mobile */
@@ -469,6 +498,9 @@
                         </div>
                     </div>
                 </div>
+                <div class="disclaimer">
+                    ⚠️ Приложение не является медицинским изделием и не заменяет консультацию врача. Перед началом терапии проконсультируйтесь со специалистом.
+                </div>
             </div>
         </section>
         
@@ -494,7 +526,7 @@
                     <a href="terms.html">Условия использования</a>
                     <a href="mailto:tonebalance@yandex.com">Поддержка</a>
                 </div>
-                <p class="copyright">© 2025 ToneBalance. Все права защищены.</p>
+                <p class="copyright">© 2025-2026 ToneBalance. Все права защищены.</p>
             </div>
         </div>
     </footer>
