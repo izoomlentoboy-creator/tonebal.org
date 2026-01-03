@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EULA — ToneBalance</title>
+    <meta name="description" content="End User License Agreement (EULA) for ToneBalance voice therapy app">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎤</text></svg>">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #6366f1;
+            --border: #e5e5e5;
+            --card-bg: #f9fafb;
+            --warning-bg: #fef3c7;
+            --warning-border: #f59e0b;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0a0a0a;
+                --text: #fafafa;
+                --text-secondary: #a1a1a1;
+                --accent: #818cf8;
+                --border: #27272a;
+                --card-bg: #18181b;
+                --warning-bg: #422006;
+                --warning-border: #f59e0b;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 60px 24px 100px;
+        }
+        
+        header {
+            margin-bottom: 48px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .lang-switch {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn:hover {
+            border-color: var(--accent);
+        }
+        
+        .lang-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        section {
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        p {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+        
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+            color: var(--text-secondary);
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .warning {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .highlight p:last-child,
+        .warning p:last-child {
+            margin-bottom: 0;
+        }
+        
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .content-ru, .content-en {
+            display: none;
+        }
+        
+        .content-ru.active, .content-en.active {
+            display: block;
+        }
+        
+        .operator-info {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .operator-info p {
+            margin-bottom: 8px;
+        }
+        
+        .operator-info p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">📜</div>
+            <h1>EULA</h1>
+            <p class="subtitle">Лицензионное соглашение с конечным пользователем</p>
+            
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="switchLang('ru')">🇷🇺 Русский</button>
+                <button class="lang-btn" onclick="switchLang('en')">🇬🇧 English</button>
+            </div>
+        </header>
+        
+        <!-- Russian Version -->
+        <div class="content-ru active">
+            <section>
+                <h2>1. Общие положения</h2>
+                <p>Настоящее Лицензионное соглашение с конечным пользователем («EULA») является юридически обязывающим соглашением между вами («Пользователь», «Лицензиат») и Индивидуальным предпринимателем («Лицензиар», «мы») относительно использования мобильного приложения ToneBalance («Приложение»).</p>
+                <p><strong>Устанавливая, копируя или иным образом используя Приложение, вы соглашаетесь соблюдать условия настоящего EULA.</strong></p>
+                <p><strong>Последнее обновление:</strong> 3 января 2026 г.</p>
+                <p><strong>Версия:</strong> 2.0</p>
+            </section>
+            
+            <section>
+                <h2>2. Предоставление лицензии</h2>
+                <p>Лицензиар предоставляет вам ограниченную, неисключительную, непередаваемую, отзывную лицензию на:</p>
+                <ul>
+                    <li>Загрузку, установку и использование Приложения на устройствах Apple, которыми вы владеете или управляете</li>
+                    <li>Доступ к базовым бесплатным функциям Приложения</li>
+                    <li>Доступ к платным функциям при условии оформления соответствующей подписки через App Store</li>
+                </ul>
+                <p>Данная лицензия предоставляется исключительно для личного, некоммерческого использования в соответствии с Правилами использования App Store.</p>
+            </section>
+            
+            <section>
+                <h2>3. Ограничения использования</h2>
+                <p>Вы обязуетесь НЕ:</p>
+                <ul>
+                    <li>Копировать, модифицировать, распространять или создавать производные работы на основе Приложения</li>
+                    <li>Осуществлять обратную разработку, декомпиляцию или дизассемблирование Приложения</li>
+                    <li>Удалять, изменять или скрывать уведомления об авторских правах или товарных знаках</li>
+                    <li>Использовать Приложение в незаконных целях или способами, нарушающими права третьих лиц</li>
+                    <li>Передавать, сублицензировать или уступать свои права по настоящему EULA</li>
+                    <li>Использовать Приложение для коммерческих целей без письменного разрешения</li>
+                    <li>Обходить технические средства защиты Приложения</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>4. Интеллектуальная собственность</h2>
+                <p>Приложение и весь связанный с ним контент защищены авторским правом в соответствии с частью 4 Гражданского кодекса Российской Федерации и международными договорами:</p>
+                <ul>
+                    <li>Программный код и архитектура Приложения</li>
+                    <li>Видеоматериалы и аудиоконтент</li>
+                    <li>Графический дизайн и пользовательский интерфейс</li>
+                    <li>Тексты упражнений и методические материалы</li>
+                    <li>Товарный знак и логотип ToneBalance</li>
+                    <li>AI-ассистент Miko и связанные технологии</li>
+                </ul>
+                <p>Все права, не предоставленные явно в настоящем EULA, сохраняются за Лицензиаром.</p>
+            </section>
+            
+            <section>
+                <h2>5. Подписки и платежи</h2>
+                <p>Приложение предлагает платный контент через неавтоматически продлеваемые подписки:</p>
+                <ul>
+                    <li>Все покупки осуществляются исключительно через систему In-App Purchase от Apple</li>
+                    <li>Стоимость программы: 2 490 ₽ (или эквивалент в местной валюте)</li>
+                    <li>Срок действия подписки: 30 дней</li>
+                    <li>Подписка НЕ продлевается автоматически</li>
+                    <li>Оплата списывается с вашего Apple ID при подтверждении покупки</li>
+                </ul>
+                <p>Возврат средств осуществляется в соответствии с политикой Apple и Законом РФ «О защите прав потребителей».</p>
+            </section>
+            
+            <div class="warning">
+                <h2>⚠️ 6. Медицинский отказ от ответственности</h2>
+                <p><strong>ВАЖНО:</strong> Приложение ToneBalance НЕ является медицинским устройством и НЕ заменяет профессиональную медицинскую помощь.</p>
+                <ul>
+                    <li>Приложение предназначено только для информационных и образовательных целей</li>
+                    <li>Перед началом любых упражнений проконсультируйтесь с врачом-фониатром или логопедом</li>
+                    <li>При возникновении боли, дискомфорта или ухудшения состояния немедленно прекратите упражнения</li>
+                    <li>Приложение не предназначено для диагностики, лечения или профилактики заболеваний</li>
+                </ul>
+            </div>
+            
+            <section>
+                <h2>7. Ограничение ответственности</h2>
+                <p>Приложение предоставляется «как есть» без каких-либо гарантий. В максимальной степени, допускаемой законодательством РФ:</p>
+                <ul>
+                    <li>Мы не гарантируем конкретных результатов терапии</li>
+                    <li>Мы не гарантируем бесперебойную работу Приложения</li>
+                    <li>Мы не несём ответственности за косвенные, случайные или штрафные убытки</li>
+                    <li>Максимальная ответственность ограничена суммой, уплаченной за подписку</li>
+                </ul>
+                <p>Данные ограничения не применяются к ответственности за вред жизни и здоровью, а также в случаях, когда ограничение ответственности запрещено законом.</p>
+            </section>
+            
+            <section>
+                <h2>8. Конфиденциальность данных</h2>
+                <p>Обработка персональных данных осуществляется в соответствии с:</p>
+                <ul>
+                    <li>Федеральным законом № 152-ФЗ «О персональных данных»</li>
+                    <li>Нашей Политикой конфиденциальности: <a href="https://tonebal.org/privacy.html">tonebal.org/privacy.html</a></li>
+                </ul>
+                <p>Голосовые записи и данные прогресса хранятся локально на вашем устройстве. Мы не передаём персональные данные на внешние серверы.</p>
+            </section>
+            
+            <section>
+                <h2>9. Прекращение лицензии</h2>
+                <p>Настоящая лицензия действует до её прекращения. Лицензия прекращается автоматически, если вы:</p>
+                <ul>
+                    <li>Нарушаете любое условие настоящего EULA</li>
+                    <li>Удаляете Приложение с устройства</li>
+                </ul>
+                <p>Мы вправе прекратить вашу лицензию в любое время при нарушении условий EULA. При прекращении вы обязаны удалить Приложение и все его копии.</p>
+            </section>
+            
+            <section>
+                <h2>10. Изменения EULA</h2>
+                <p>Мы оставляем за собой право изменять настоящее EULA. При существенных изменениях:</p>
+                <ul>
+                    <li>Уведомление будет размещено в Приложении</li>
+                    <li>Продолжение использования после уведомления означает согласие с изменениями</li>
+                    <li>Актуальная версия всегда доступна на сайте: <a href="https://tonebal.org/eula.html">tonebal.org/eula.html</a></li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>11. Применимое право и разрешение споров</h2>
+                <p>Настоящее EULA регулируется законодательством Российской Федерации.</p>
+                <ul>
+                    <li>Досудебный претензионный порядок обязателен</li>
+                    <li>Срок рассмотрения претензии: 30 дней</li>
+                    <li>Споры разрешаются в суде по месту жительства потребителя или по месту нахождения ответчика</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>12. Контактная информация</h2>
+                <p>По вопросам, связанным с настоящим EULA:</p>
+                <div class="operator-info">
+                    <p><strong>Email:</strong> <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></p>
+                    <p><strong>Условия использования:</strong> <a href="https://tonebal.org/terms.html">tonebal.org/terms.html</a></p>
+                    <p><strong>Политика конфиденциальности:</strong> <a href="https://tonebal.org/privacy.html">tonebal.org/privacy.html</a></p>
+                </div>
+            </section>
+        </div>
+        
+        <!-- English Version -->
+        <div class="content-en">
+            <section>
+                <h2>1. General Provisions</h2>
+                <p>This End User License Agreement ("EULA") is a legally binding agreement between you ("User", "Licensee") and Individual Entrepreneur ("Licensor", "we") regarding the use of the ToneBalance mobile application ("Application").</p>
+                <p><strong>By installing, copying, or otherwise using the Application, you agree to be bound by the terms of this EULA.</strong></p>
+                <p><strong>Last updated:</strong> January 3, 2026</p>
+                <p><strong>Version:</strong> 2.0</p>
+            </section>
+            
+            <section>
+                <h2>2. Grant of License</h2>
+                <p>The Licensor grants you a limited, non-exclusive, non-transferable, revocable license to:</p>
+                <ul>
+                    <li>Download, install, and use the Application on Apple devices that you own or control</li>
+                    <li>Access basic free features of the Application</li>
+                    <li>Access paid features subject to purchasing the appropriate subscription through the App Store</li>
+                </ul>
+                <p>This license is granted solely for personal, non-commercial use in accordance with the App Store Usage Rules.</p>
+            </section>
+            
+            <section>
+                <h2>3. Restrictions on Use</h2>
+                <p>You agree NOT to:</p>
+                <ul>
+                    <li>Copy, modify, distribute, or create derivative works based on the Application</li>
+                    <li>Reverse engineer, decompile, or disassemble the Application</li>
+                    <li>Remove, alter, or obscure any copyright or trademark notices</li>
+                    <li>Use the Application for illegal purposes or in ways that violate third-party rights</li>
+                    <li>Transfer, sublicense, or assign your rights under this EULA</li>
+                    <li>Use the Application for commercial purposes without written permission</li>
+                    <li>Circumvent any technical protection measures in the Application</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>4. Intellectual Property</h2>
+                <p>The Application and all related content are protected by copyright under Part 4 of the Civil Code of the Russian Federation and international treaties:</p>
+                <ul>
+                    <li>Software code and Application architecture</li>
+                    <li>Video materials and audio content</li>
+                    <li>Graphic design and user interface</li>
+                    <li>Exercise texts and methodological materials</li>
+                    <li>ToneBalance trademark and logo</li>
+                    <li>Miko AI assistant and related technologies</li>
+                </ul>
+                <p>All rights not expressly granted in this EULA are reserved by the Licensor.</p>
+            </section>
+            
+            <section>
+                <h2>5. Subscriptions and Payments</h2>
+                <p>The Application offers paid content through non-auto-renewing subscriptions:</p>
+                <ul>
+                    <li>All purchases are made exclusively through Apple's In-App Purchase system</li>
+                    <li>Program price: 2,490 RUB (or local currency equivalent)</li>
+                    <li>Subscription duration: 30 days</li>
+                    <li>Subscription does NOT auto-renew</li>
+                    <li>Payment is charged to your Apple ID upon confirmation of purchase</li>
+                </ul>
+                <p>Refunds are processed in accordance with Apple's policy and the Russian Federation Law "On Consumer Rights Protection".</p>
+            </section>
+            
+            <div class="warning">
+                <h2>⚠️ 6. Medical Disclaimer</h2>
+                <p><strong>IMPORTANT:</strong> The ToneBalance Application is NOT a medical device and does NOT replace professional medical care.</p>
+                <ul>
+                    <li>The Application is intended for informational and educational purposes only</li>
+                    <li>Consult a phoniatrist or speech therapist before starting any exercises</li>
+                    <li>Stop exercises immediately if you experience pain, discomfort, or worsening condition</li>
+                    <li>The Application is not intended to diagnose, treat, or prevent any disease</li>
+                </ul>
+            </div>
+            
+            <section>
+                <h2>7. Limitation of Liability</h2>
+                <p>The Application is provided "as is" without any warranties. To the maximum extent permitted by Russian law:</p>
+                <ul>
+                    <li>We do not guarantee specific therapy results</li>
+                    <li>We do not guarantee uninterrupted operation of the Application</li>
+                    <li>We are not liable for indirect, incidental, or punitive damages</li>
+                    <li>Maximum liability is limited to the amount paid for the subscription</li>
+                </ul>
+                <p>These limitations do not apply to liability for harm to life and health, or where limitation of liability is prohibited by law.</p>
+            </section>
+            
+            <section>
+                <h2>8. Data Privacy</h2>
+                <p>Personal data processing is carried out in accordance with:</p>
+                <ul>
+                    <li>Federal Law No. 152-FZ "On Personal Data"</li>
+                    <li>Our Privacy Policy: <a href="https://tonebal.org/privacy.html">tonebal.org/privacy.html</a></li>
+                </ul>
+                <p>Voice recordings and progress data are stored locally on your device. We do not transfer personal data to external servers.</p>
+            </section>
+            
+            <section>
+                <h2>9. Termination</h2>
+                <p>This license is effective until terminated. The license terminates automatically if you:</p>
+                <ul>
+                    <li>Violate any term of this EULA</li>
+                    <li>Delete the Application from your device</li>
+                </ul>
+                <p>We may terminate your license at any time if you breach the terms of this EULA. Upon termination, you must delete the Application and all copies.</p>
+            </section>
+            
+            <section>
+                <h2>10. Changes to EULA</h2>
+                <p>We reserve the right to modify this EULA. For material changes:</p>
+                <ul>
+                    <li>Notice will be posted in the Application</li>
+                    <li>Continued use after notice constitutes acceptance of changes</li>
+                    <li>The current version is always available at: <a href="https://tonebal.org/eula.html">tonebal.org/eula.html</a></li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>11. Governing Law and Dispute Resolution</h2>
+                <p>This EULA is governed by the laws of the Russian Federation.</p>
+                <ul>
+                    <li>Pre-trial claim procedure is mandatory</li>
+                    <li>Claim review period: 30 days</li>
+                    <li>Disputes are resolved in court at the consumer's place of residence or the defendant's location</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>12. Contact Information</h2>
+                <p>For questions regarding this EULA:</p>
+                <div class="operator-info">
+                    <p><strong>Email:</strong> <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></p>
+                    <p><strong>Terms of Service:</strong> <a href="https://tonebal.org/terms.html">tonebal.org/terms.html</a></p>
+                    <p><strong>Privacy Policy:</strong> <a href="https://tonebal.org/privacy.html">tonebal.org/privacy.html</a></p>
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <div class="footer-links">
+                <a href="index.html">← На главную</a>
+                <a href="terms.html">Условия использования</a>
+                <a href="privacy.html">Конфиденциальность</a>
+            </div>
+            <p>© 2025-2026 ToneBalance. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <script>
+        function switchLang(lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-ru, .content-en').forEach(el => el.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.querySelector('.content-' + lang).classList.add('active');
+        }
+    </script>
+</body>
+</html>
