@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service — ToneBalance</title>
+    <meta name="description" content="Terms of Service for ToneBalance voice therapy app">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎤</text></svg>">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #6366f1;
+            --border: #e5e5e5;
+            --card-bg: #f9fafb;
+            --warning-bg: #fef3c7;
+            --warning-border: #f59e0b;
+            --danger-bg: #fee2e2;
+            --danger-border: #ef4444;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0a0a0a;
+                --text: #fafafa;
+                --text-secondary: #a1a1a1;
+                --accent: #818cf8;
+                --border: #27272a;
+                --card-bg: #18181b;
+                --warning-bg: #422006;
+                --warning-border: #f59e0b;
+                --danger-bg: #450a0a;
+                --danger-border: #ef4444;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 60px 24px 100px;
+        }
+        
+        header {
+            margin-bottom: 48px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .lang-switch {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn:hover {
+            border-color: var(--accent);
+        }
+        
+        .lang-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        section {
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        p {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+        
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+            color: var(--text-secondary);
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .warning {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .danger {
+            background: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .highlight p:last-child,
+        .warning p:last-child,
+        .danger p:last-child {
+            margin-bottom: 0;
+        }
+        
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .content-ru, .content-en {
+            display: none;
+        }
+        
+        .content-ru.active, .content-en.active {
+            display: block;
+        }
+        
+        strong {
+            color: var(--text);
+        }
+        
+        .operator-info {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .operator-info p {
+            margin-bottom: 8px;
+        }
+        
+        .operator-info p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .protection-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        
+        .protection-table th,
+        .protection-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        
+        .protection-table th {
+            color: var(--text);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🎤</div>
+            <h1>ToneBalance</h1>
+            <p class="subtitle">Terms of Service / Условия использования</p>
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="switchLang('ru')">Русский</button>
+                <button class="lang-btn" onclick="switchLang('en')">English</button>
+            </div>
+        </header>
+        
+        <!-- Russian Version -->
+        <div class="content-ru active">
+            <section>
+                <h2>1. Общие положения</h2>
+                <p>Настоящие Условия использования (далее — «Условия») являются публичной офертой в соответствии со статьёй 437 Гражданского кодекса Российской Федерации и определяют порядок использования мобильного приложения ToneBalance (далее — «Приложение»).</p>
+                <p>Используя Приложение, вы соглашаетесь с настоящими Условиями в полном объёме. Если вы не согласны с какими-либо условиями, пожалуйста, не используйте Приложение.</p>
+                <p><strong>Дата последнего обновления:</strong> 6 января 2026 г.</p>
+                <p><strong>Редакция:</strong> 3.0</p>
+            </section>
+            
+            <section>
+                <h2>2. Правообладатель</h2>
+                <div class="operator-info">
+                    <p><strong>Наименование:</strong> Индивидуальный предприниматель [ФИО]</p>
+                    <p><strong>ИНН:</strong> [ИНН]</p>
+                    <p><strong>ОГРНИП:</strong> [ОГРНИП]</p>
+                    <p><strong>Адрес:</strong> [Адрес регистрации]</p>
+                    <p><strong>Email:</strong> <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></p>
+                </div>
+            </section>
+            
+            <section>
+                <h2>3. Описание сервиса</h2>
+                <p>ToneBalance — это мобильное приложение для голосовой терапии и реабилитации, которое предоставляет:</p>
+                <ul>
+                    <li>Упражнения для голоса и дыхания</li>
+                    <li>Программы реабилитации при различных голосовых нарушениях</li>
+                    <li>Видеоинструкции от специалистов</li>
+                    <li>Отслеживание прогресса терапии</li>
+                    <li>Напоминания о тренировках и питьевом режиме</li>
+                    <li>AI-ассистента Miko для поддержки</li>
+                </ul>
+            </section>
+            
+            <div class="warning">
+                <h2>⚠️ Медицинский отказ от ответственности</h2>
+                <p><strong>ToneBalance НЕ является заменой профессиональной медицинской помощи.</strong></p>
+                <p>Приложение предназначено только для информационных и образовательных целей и не является медицинским изделием в соответствии с Федеральным законом № 323-ФЗ «Об основах охраны здоровья граждан в Российской Федерации».</p>
+                <p>Перед началом любой программы терапии обязательно проконсультируйтесь с врачом-фониатром, ЛОР-врачом или логопедом.</p>
+                <p>При появлении боли, дискомфорта или ухудшения состояния немедленно прекратите упражнения и обратитесь к специалисту.</p>
+            </div>
+            
+            <section>
+                <h2>4. Программы терапии</h2>
+                <p>ToneBalance предлагает программы для следующих состояний:</p>
+                <ul>
+                    <li><strong>Парез гортани</strong> — реабилитация при параличе голосовых связок</li>
+                    <li><strong>Дисфагия</strong> — упражнения при нарушениях глотания</li>
+                    <li><strong>Мутация голоса</strong> — коррекция подросткового голоса</li>
+                    <li><strong>Гипотонус связок</strong> — укрепление голосовых складок</li>
+                    <li><strong>Гипертонус связок</strong> — расслабление и снятие напряжения</li>
+                    <li><strong>Узелки голосовых связок</strong> — щадящая терапия</li>
+                    <li><strong>Профессиональный голос</strong> — развитие голоса для профессионалов</li>
+                </ul>
+                <p>Все программы предоставляются бесплатно.</p>
+            </section>
+            
+            <section>
+                <h2>5. Права потребителей</h2>
+                <p>В соответствии с Законом РФ «О защите прав потребителей» вы имеете право:</p>
+                <ul>
+                    <li>На получение полной и достоверной информации об услуге</li>
+                    <li>На безопасность услуги</li>
+                    <li>На возмещение вреда, причинённого вследствие недостатков услуги</li>
+                    <li>На отказ от услуги в любое время</li>
+                </ul>
+                <p>Претензии направляйте на адрес: <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a>. Срок рассмотрения претензии — 10 дней.</p>
+            </section>
+            
+            <section>
+                <h2>6. Права интеллектуальной собственности</h2>
+                <p>Всё содержимое Приложения защищено авторским правом в соответствии с частью четвёртой Гражданского кодекса Российской Федерации:</p>
+                <ul>
+                    <li>Видеоматериалы и инструкции</li>
+                    <li>Тексты упражнений и описания</li>
+                    <li>Дизайн интерфейса и графика</li>
+                    <li>Программный код Приложения</li>
+                    <li>Товарный знак и наименование ToneBalance</li>
+                    <li>AI-ассистент Miko и связанные технологии</li>
+                </ul>
+                <p>Запрещается копирование, распространение, запись экрана или иное воспроизведение контента без письменного разрешения правообладателя.</p>
+                <p>Нарушение авторских прав влечёт гражданско-правовую, административную и уголовную ответственность в соответствии с законодательством Российской Федерации (статьи 1252, 1301 ГК РФ, статья 7.12 КоАП РФ, статья 146 УК РФ).</p>
+            </section>
+            
+            <div class="danger">
+                <h2>🛡️ 7. Защита контента и технические ограничения</h2>
+                <p><strong>В целях защиты авторских прав правообладателя в Приложении применяются технические средства защиты информации:</strong></p>
+                
+                <p><strong>7.1. Запрещённые действия:</strong></p>
+                <ul>
+                    <li>Создание снимков экрана (скриншотов) содержимого Приложения</li>
+                    <li>Запись экрана (screen recording) при использовании Приложения</li>
+                    <li>Использование средств зеркалирования экрана (AirPlay, Screen Mirroring и т.п.)</li>
+                    <li>Применение программ захвата изображения</li>
+                    <li>Любые иные способы копирования визуального контента Приложения</li>
+                </ul>
+                
+                <p><strong>7.2. Система прогрессивных санкций:</strong></p>
+                <p>При обнаружении попытки создания скриншота или записи экрана применяется следующая система санкций:</p>
+                <table class="protection-table">
+                    <tr>
+                        <th>Нарушение</th>
+                        <th>Блокировка</th>
+                    </tr>
+                    <tr>
+                        <td>1-е предупреждение</td>
+                        <td>1 минута</td>
+                    </tr>
+                    <tr>
+                        <td>2-е предупреждение</td>
+                        <td>5 минут</td>
+                    </tr>
+                    <tr>
+                        <td>3-е предупреждение</td>
+                        <td>10 минут</td>
+                    </tr>
+                    <tr>
+                        <td>4-е предупреждение</td>
+                        <td>15 минут</td>
+                    </tr>
+                    <tr>
+                        <td>5-е предупреждение</td>
+                        <td>30 минут</td>
+                    </tr>
+                    <tr>
+                        <td>6-е нарушение</td>
+                        <td><strong>Полная блокировка</strong></td>
+                    </tr>
+                </table>
+                
+                <p><strong>7.3. Полная блокировка:</strong></p>
+                <p>После шестого нарушения доступ к Приложению блокируется. Для разблокировки необходимо:</p>
+                <ol>
+                    <li>Направить запрос на email: <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></li>
+                    <li>Указать уникальный идентификатор пользователя (отображается в Приложении)</li>
+                    <li>Объяснить причины нарушения</li>
+                    <li>Получить и ввести 8-значный код разблокировки</li>
+                </ol>
+                <p>Правообладатель оставляет за собой право отказать в разблокировке в случае систематических или злонамеренных нарушений.</p>
+                
+                <p><strong>7.4. Правовые основания:</strong></p>
+                <p>Применение технических средств защиты осуществляется в соответствии со статьёй 1299 ГК РФ. Обход технических средств защиты авторских прав является правонарушением (статья 1299 п. 2 ГК РФ).</p>
+            </div>
+            
+            <section>
+                <h2>8. Правила использования</h2>
+                <p>Вы соглашаетесь:</p>
+                <ul>
+                    <li>Использовать Приложение только в личных, некоммерческих целях</li>
+                    <li>Не пытаться обойти защиту контента или технические средства защиты</li>
+                    <li>Не создавать скриншоты и записи экрана Приложения</li>
+                    <li>Не передавать доступ к Приложению третьим лицам</li>
+                    <li>Не использовать Приложение для создания конкурирующих продуктов</li>
+                    <li>Не осуществлять обратную разработку (реверс-инжиниринг) Приложения</li>
+                    <li>Соблюдать законодательство Российской Федерации при использовании Приложения</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>9. Ограничение ответственности</h2>
+                <p>Приложение предоставляется «как есть» (as is). В пределах, допускаемых законодательством РФ, мы не гарантируем:</p>
+                <ul>
+                    <li>Конкретных результатов терапии</li>
+                    <li>Непрерывную работу без ошибок</li>
+                    <li>Совместимость со всеми устройствами</li>
+                </ul>
+                <p>Ответственность правообладателя ограничена в соответствии с действующим законодательством РФ.</p>
+                <p>Ограничение ответственности не распространяется на случаи причинения вреда жизни и здоровью, а также на случаи умысла или грубой неосторожности.</p>
+            </section>
+            
+            <section>
+                <h2>10. Возрастные ограничения</h2>
+                <p>Приложение имеет возрастной рейтинг 4+, однако:</p>
+                <ul>
+                    <li>Не предназначено для детей младше 4 лет</li>
+                    <li>Пользователям 4-17 лет рекомендуется использование под присмотром взрослых</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>11. Изменения условий</h2>
+                <p>Мы оставляем за собой право изменять настоящие Условия. Об изменениях мы уведомим путём публикации новой редакции на сайте и/или в Приложении.</p>
+                <p>Продолжая использовать Приложение после публикации изменений, вы принимаете обновлённые Условия.</p>
+                <p>Актуальная версия Условий всегда доступна по адресу: <a href="https://tonebal.org/terms.html">tonebal.org/terms.html</a></p>
+            </section>
+            
+            <section>
+                <h2>12. Применимое право и разрешение споров</h2>
+                <p>Настоящие Условия регулируются законодательством Российской Федерации.</p>
+                <p>Все споры, возникающие из настоящих Условий или в связи с ними, подлежат разрешению путём переговоров. В случае недостижения согласия споры разрешаются:</p>
+                <ul>
+                    <li>Для потребителей — в суде по месту жительства истца или по месту нахождения ответчика (по выбору истца) в соответствии с п. 2 ст. 17 Закона РФ «О защите прав потребителей»</li>
+                    <li>Для иных споров — в суде по месту нахождения ответчика</li>
+                </ul>
+                <p>Досудебный претензионный порядок является обязательным. Срок ответа на претензию — 10 рабочих дней.</p>
+            </section>
+            
+            <section>
+                <h2>13. Контакты</h2>
+                <p>По вопросам использования Приложения:</p>
+                <p>Email: <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></p>
+            </section>
+            
+            <section>
+                <h2>14. Заключительные положения</h2>
+                <p>Настоящие Условия вступают в силу с момента начала использования Приложения и действуют бессрочно.</p>
+                <p>Если какое-либо положение настоящих Условий будет признано недействительным, остальные положения продолжают действовать в полном объёме.</p>
+                <p>Настоящие Условия составлены на русском языке. В случае расхождений между русской и английской версиями преимущественную силу имеет русская версия.</p>
+            </section>
+        </div>
+        
+        <!-- English Version -->
+        <div class="content-en">
+            <section>
+                <h2>1. General Provisions</h2>
+                <p>These Terms of Service (hereinafter "Terms") constitute a public offer in accordance with Article 437 of the Civil Code of the Russian Federation and define the procedure for using the ToneBalance mobile application (hereinafter "Application").</p>
+                <p>By using the Application, you agree to these Terms in full. If you do not agree with any terms, please do not use the Application.</p>
+                <p><strong>Last updated:</strong> January 6, 2026</p>
+                <p><strong>Version:</strong> 3.0</p>
+            </section>
+            
+            <section>
+                <h2>2. Rights Holder</h2>
+                <div class="operator-info">
+                    <p><strong>Name:</strong> Individual Entrepreneur [Full Name]</p>
+                    <p><strong>TIN (INN):</strong> [INN]</p>
+                    <p><strong>OGRNIP:</strong> [OGRNIP]</p>
+                    <p><strong>Address:</strong> [Registration Address], Russia</p>
+                    <p><strong>Email:</strong> <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></p>
+                </div>
+            </section>
+            
+            <section>
+                <h2>3. Service Description</h2>
+                <p>ToneBalance is a mobile application for voice therapy and rehabilitation that provides:</p>
+                <ul>
+                    <li>Voice and breathing exercises</li>
+                    <li>Rehabilitation programs for various voice disorders</li>
+                    <li>Video instructions from specialists</li>
+                    <li>Therapy progress tracking</li>
+                    <li>Training and hydration reminders</li>
+                    <li>Miko AI assistant for support</li>
+                </ul>
+            </section>
+            
+            <div class="warning">
+                <h2>⚠️ Medical Disclaimer</h2>
+                <p><strong>ToneBalance is NOT a substitute for professional medical care.</strong></p>
+                <p>The Application is intended for informational and educational purposes only and is not a medical device in accordance with Federal Law No. 323-FZ "On the Fundamentals of Health Protection of Citizens in the Russian Federation".</p>
+                <p>Before starting any therapy program, consult with a voice specialist, ENT doctor, or speech therapist.</p>
+                <p>If you experience pain, discomfort, or worsening symptoms, stop exercises immediately and consult a specialist.</p>
+            </div>
+            
+            <section>
+                <h2>4. Therapy Programs</h2>
+                <p>ToneBalance offers programs for the following conditions:</p>
+                <ul>
+                    <li><strong>Laryngeal Paresis</strong> — rehabilitation for vocal cord paralysis</li>
+                    <li><strong>Dysphagia</strong> — exercises for swallowing disorders</li>
+                    <li><strong>Voice Mutation</strong> — adolescent voice correction</li>
+                    <li><strong>Hypotonic Dysphonia</strong> — strengthening vocal folds</li>
+                    <li><strong>Hypertonic Dysphonia</strong> — relaxation and tension relief</li>
+                    <li><strong>Vocal Nodules</strong> — gentle therapy</li>
+                    <li><strong>Professional Voice</strong> — voice development for professionals</li>
+                </ul>
+                <p>All programs are provided free of charge.</p>
+            </section>
+            
+            <section>
+                <h2>5. Consumer Rights</h2>
+                <p>In accordance with the Russian Federation Law "On Consumer Rights Protection", you have the right to:</p>
+                <ul>
+                    <li>Receive complete and accurate information about the service</li>
+                    <li>Service safety</li>
+                    <li>Compensation for damage caused by service defects</li>
+                    <li>Refuse the service at any time</li>
+                </ul>
+                <p>Send complaints to: <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a>. Complaint review period is 10 days.</p>
+            </section>
+            
+            <section>
+                <h2>6. Intellectual Property Rights</h2>
+                <p>All Application content is protected by copyright in accordance with Part Four of the Civil Code of the Russian Federation:</p>
+                <ul>
+                    <li>Video materials and instructions</li>
+                    <li>Exercise texts and descriptions</li>
+                    <li>Interface design and graphics</li>
+                    <li>Application source code</li>
+                    <li>ToneBalance trademark and name</li>
+                    <li>Miko AI assistant and related technologies</li>
+                </ul>
+                <p>Copying, distribution, screen recording, or other reproduction of content without written permission of the rights holder is prohibited.</p>
+                <p>Violation of copyright entails civil, administrative, and criminal liability in accordance with the legislation of the Russian Federation (Articles 1252, 1301 of the Civil Code, Article 7.12 of the Code of Administrative Offenses, Article 146 of the Criminal Code).</p>
+            </section>
+            
+            <div class="danger">
+                <h2>🛡️ 7. Content Protection and Technical Restrictions</h2>
+                <p><strong>To protect the rights holder's copyright, the Application employs technical protection measures:</strong></p>
+                
+                <p><strong>7.1. Prohibited Actions:</strong></p>
+                <ul>
+                    <li>Taking screenshots of Application content</li>
+                    <li>Screen recording while using the Application</li>
+                    <li>Using screen mirroring tools (AirPlay, Screen Mirroring, etc.)</li>
+                    <li>Using image capture software</li>
+                    <li>Any other methods of copying visual content from the Application</li>
+                </ul>
+                
+                <p><strong>7.2. Progressive Sanctions System:</strong></p>
+                <p>Upon detection of a screenshot or screen recording attempt, the following sanction system applies:</p>
+                <table class="protection-table">
+                    <tr>
+                        <th>Violation</th>
+                        <th>Block Duration</th>
+                    </tr>
+                    <tr>
+                        <td>1st warning</td>
+                        <td>1 minute</td>
+                    </tr>
+                    <tr>
+                        <td>2nd warning</td>
+                        <td>5 minutes</td>
+                    </tr>
+                    <tr>
+                        <td>3rd warning</td>
+                        <td>10 minutes</td>
+                    </tr>
+                    <tr>
+                        <td>4th warning</td>
+                        <td>15 minutes</td>
+                    </tr>
+                    <tr>
+                        <td>5th warning</td>
+                        <td>30 minutes</td>
+                    </tr>
+                    <tr>
+                        <td>6th violation</td>
+                        <td><strong>Full block</strong></td>
+                    </tr>
+                </table>
+                
+                <p><strong>7.3. Full Block:</strong></p>
+                <p>After the sixth violation, access to the Application is blocked. To unlock, you must:</p>
+                <ol>
+                    <li>Send a request to email: <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></li>
+                    <li>Provide your unique user identifier (displayed in the Application)</li>
+                    <li>Explain the reasons for the violation</li>
+                    <li>Receive and enter the 8-digit unlock code</li>
+                </ol>
+                <p>The rights holder reserves the right to refuse to unlock in cases of systematic or malicious violations.</p>
+                
+                <p><strong>7.4. Legal Basis:</strong></p>
+                <p>The use of technical protection measures is carried out in accordance with Article 1299 of the Civil Code of the Russian Federation. Circumventing technical copyright protection measures is an offense (Article 1299 paragraph 2 of the Civil Code).</p>
+            </div>
+            
+            <section>
+                <h2>8. Usage Rules</h2>
+                <p>You agree to:</p>
+                <ul>
+                    <li>Use the Application only for personal, non-commercial purposes</li>
+                    <li>Not attempt to bypass content protection or technical protection measures</li>
+                    <li>Not take screenshots or screen recordings of the Application</li>
+                    <li>Not share Application access with third parties</li>
+                    <li>Not use the Application to create competing products</li>
+                    <li>Not reverse engineer the Application</li>
+                    <li>Comply with the legislation of the Russian Federation when using the Application</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>9. Limitation of Liability</h2>
+                <p>The Application is provided "as is". To the extent permitted by Russian law, we do not guarantee:</p>
+                <ul>
+                    <li>Specific therapy results</li>
+                    <li>Uninterrupted, error-free operation</li>
+                    <li>Compatibility with all devices</li>
+                </ul>
+                <p>The rights holder's liability is limited in accordance with applicable Russian law.</p>
+                <p>Limitation of liability does not apply to cases of harm to life and health, as well as cases of intent or gross negligence.</p>
+            </section>
+            
+            <section>
+                <h2>10. Age Restrictions</h2>
+                <p>The Application has a 4+ age rating, however:</p>
+                <ul>
+                    <li>Not intended for children under 4 years old</li>
+                    <li>Users aged 4-17 should use under adult supervision</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>11. Changes to Terms</h2>
+                <p>We reserve the right to modify these Terms. We will notify you of changes by publishing a new version on the website and/or in the Application.</p>
+                <p>By continuing to use the Application after changes are published, you accept the updated Terms.</p>
+                <p>The current version of the Terms is always available at: <a href="https://tonebal.org/terms.html">tonebal.org/terms.html</a></p>
+            </section>
+            
+            <section>
+                <h2>12. Governing Law and Dispute Resolution</h2>
+                <p>These Terms are governed by the laws of the Russian Federation.</p>
+                <p>All disputes arising from or in connection with these Terms shall be resolved through negotiations. If agreement is not reached, disputes shall be resolved:</p>
+                <ul>
+                    <li>For consumers — in court at the plaintiff's place of residence or the defendant's location (at the plaintiff's choice) in accordance with clause 2 of Article 17 of the Russian Federation Law "On Consumer Rights Protection"</li>
+                    <li>For other disputes — in court at the defendant's location</li>
+                </ul>
+                <p>Pre-trial claim procedure is mandatory. Claim response period is 10 business days.</p>
+            </section>
+            
+            <section>
+                <h2>13. Contact</h2>
+                <p>For questions regarding the Application:</p>
+                <p>Email: <a href="mailto:tonebalance@yandex.com">tonebalance@yandex.com</a></p>
+            </section>
+            
+            <section>
+                <h2>14. Final Provisions</h2>
+                <p>These Terms take effect from the moment you start using the Application and remain in effect indefinitely.</p>
+                <p>If any provision of these Terms is found to be invalid, the remaining provisions shall continue in full force and effect.</p>
+                <p>These Terms are drawn up in Russian. In case of discrepancies between the Russian and English versions, the Russian version shall prevail.</p>
+            </section>
+        </div>
+        
+        <footer>
+            <div class="footer-links">
+                <a href="index.html">← Home</a>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="eula.html">EULA</a>
+            </div>
+            <p>© 2025-2026 ToneBalance. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <script>
+        function switchLang(lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-ru, .content-en').forEach(content => content.classList.remove('active'));
+            
+            if (lang === 'ru') {
+                document.querySelector('.lang-btn:first-child').classList.add('active');
+                document.querySelector('.content-ru').classList.add('active');
+            } else {
+                document.querySelector('.lang-btn:last-child').classList.add('active');
+                document.querySelector('.content-en').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
