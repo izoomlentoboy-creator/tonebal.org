@@ -21,8 +21,8 @@ const PORT = process.env.PORT || 3000;
 // - YOOKASSA_SHOP_ID: Ваш ID магазина
 // - YOOKASSA_SECRET_KEY: Секретный ключ из личного кабинета YooKassa
 // - BASE_URL: https://tonebal.org
-const YOOKASSA_SHOP_ID = process.env.YOOKASSA_SHOP_ID || '513198';
-const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY || 'test_*gEx1y_-kAlQTdsNDS26L-KNHlgCdvzAWPtDDz3mTTEuM';
+const YOOKASSA_SHOP_ID = process.env.YOOKASSA_SHOP_ID || '1258775';
+const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY || 'test_LWABxu7mxbHDnJPLa-bDwfv_8EKHha26xXjZSJ1N1ZI';
 const BASE_URL = process.env.BASE_URL || 'https://tonebal.org';
 
 // Subscription settings
