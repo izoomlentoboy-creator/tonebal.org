@@ -8,22 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/privacy.html",
-      "dest": "/privacy.html"
-    },
-    {
-      "src": "/terms.html",
-      "dest": "/terms.html"
-    },
-    {
-      "src": "/index.html",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/pay",
-      "dest": "/index.html"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "/server.js"
     },
