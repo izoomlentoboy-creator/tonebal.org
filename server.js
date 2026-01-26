@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 // CONFIGURATION - ЗАМЕНИТЕ НА СВОИ ДАННЫЕ!
 // ============================================
 const YOOKASSA_SHOP_ID = process.env.YOOKASSA_SHOP_ID || '513198';
-const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY || 'test_*g-9MajwhhX704_hx3udBkn0YAoiMZCE65nmEMeumcsdI';
+const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY || 'test_*gEx1y_-kAlQTdsNDS26L-KNHlgCdvzAWPtDDz3mTTEuM';
 const BASE_URL = process.env.BASE_URL || 'https://tonebal.org';
 
 // Subscription settings
