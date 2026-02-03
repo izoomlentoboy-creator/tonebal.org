@@ -11,6 +11,9 @@ import Profile from "./pages/Profile";
 import Payment from "./pages/Payment";
 import NosologyPage from "./pages/NosologyPage";
 import LessonPage from "./pages/LessonPage";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import FAQ from "./pages/FAQ";
 
 function Router() {
   return (
@@ -22,6 +25,9 @@ function Router() {
       <Route path="/payment" component={Payment} />
       <Route path="/nosology/:id" component={NosologyPage} />
       <Route path="/nosology/:nosologyId/lesson/:lessonId" component={LessonPage} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/faq" component={FAQ} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
