@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Timer } from "@/components/Timer";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock, Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useParams, useLocation } from "wouter";
 import { toast } from "sonner";
 
@@ -124,10 +125,7 @@ export default function LessonPage() {
           <div className="mb-8">
             <Card>
               <CardContent className="pt-6">
-                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                  <p className="text-muted-foreground">Видео-плеер</p>
-                  {/* В реальной реализации здесь будет HTML5 video или YouTube embed */}
-                </div>
+                <VideoPlayer videoUrl={lesson.videoUrl} title={lesson.title} />
               </CardContent>
             </Card>
           </div>
@@ -267,6 +265,185 @@ export default function LessonPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Video Player Component with controls
+function VideoPlayer({ videoUrl, title }: { videoUrl: string; title: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+
+  // Check if it's a YouTube URL
+  const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+
+  // Extract YouTube video ID
+  const getYouTubeId = (url: string) => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : null;
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      setProgress((video.currentTime / video.duration) * 100);
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration);
+    };
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = !video.muted;
+    setIsMuted(!isMuted);
+  };
+
+  const toggleFullscreen = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      video.requestFullscreen();
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const newTime = (clickX / width) * video.duration;
+    video.currentTime = newTime;
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // YouTube embed
+  if (isYouTube) {
+    const videoId = getYouTubeId(videoUrl);
+    return (
+      <div className="aspect-video bg-black rounded-lg overflow-hidden">
+        <iframe
+          className="w-full h-full"
+          src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  // Native HTML5 video player
+  return (
+    <div
+      className="relative aspect-video bg-black rounded-lg overflow-hidden group"
+      onMouseEnter={() => setShowControls(true)}
+      onMouseLeave={() => !isPlaying && setShowControls(true)}
+    >
+      <video
+        ref={videoRef}
+        className="w-full h-full object-contain"
+        src={videoUrl}
+        playsInline
+        onClick={togglePlay}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+      />
+
+      {/* Controls overlay */}
+      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${showControls || !isPlaying ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Progress bar */}
+        <div
+          className="h-1 bg-white/30 rounded-full mb-3 cursor-pointer"
+          onClick={handleProgressClick}
+        >
+          <div
+            className="h-full bg-primary rounded-full transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={togglePlay}
+              className="text-white hover:text-primary transition-colors"
+            >
+              {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+            </button>
+
+            <button
+              onClick={toggleMute}
+              className="text-white hover:text-primary transition-colors"
+            >
+              {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            </button>
+
+            <span className="text-white text-sm">
+              {formatTime(videoRef.current?.currentTime || 0)} / {formatTime(duration)}
+            </span>
+          </div>
+
+          <button
+            onClick={toggleFullscreen}
+            className="text-white hover:text-primary transition-colors"
+          >
+            <Maximize className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Big play button in center when paused */}
+      {!isPlaying && (
+        <button
+          onClick={togglePlay}
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary/90 hover:bg-primary rounded-full p-4 transition-all hover:scale-110"
+        >
+          <Play className="h-10 w-10 text-white" />
+        </button>
+      )}
     </div>
   );
 }
