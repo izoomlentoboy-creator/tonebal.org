@@ -192,9 +192,26 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t py-8 mt-16">
-        <div className="container text-center text-sm text-muted-foreground">
-          <p>© 2026 ToneBalance. Все права защищены.</p>
-          <p className="mt-2">Профессиональная голосовая реабилитация онлайн</p>
+        <div className="container">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              <p>© 2026 ToneBalance. Все права защищены.</p>
+            </div>
+            <div className="flex gap-6 text-sm">
+              <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
+                Пользовательское соглашение
+              </Link>
+              <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
+                Политика конфиденциальности
+              </Link>
+              <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-colors">
+                FAQ
+              </Link>
+            </div>
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Профессиональная голосовая реабилитация онлайн
+          </p>
         </div>
       </footer>
     </div>
