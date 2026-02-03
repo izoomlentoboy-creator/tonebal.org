@@ -16,19 +16,19 @@
       "dest": "/server.js"
     },
     {
-      "src": "/support",
+      "src": "/pay",
       "dest": "/server.js"
     },
     {
       "src": "/terms.html",
-      "dest": "/terms.html"
+      "dest": "/server.js"
     },
     {
       "src": "/privacy.html",
-      "dest": "/privacy.html"
+      "dest": "/server.js"
     },
     {
-      "src": "/support.html",
+      "src": "^/$",
       "dest": "/server.js"
     },
     {
