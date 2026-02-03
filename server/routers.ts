@@ -202,10 +202,11 @@ export const appRouter = router({
 
             // Определяем тип подписки по сохраненному nosology
             const isYearly = dbPayment.nosology === "all_yearly";
+            const plan = isYearly ? "yearly" : "monthly";
             const days = isYearly ? ENV.subscriptionYearlyDays : ENV.subscriptionDays;
 
-            // Создаём подписку с криптостойким кодом
-            const accessCode = generateAccessCode();
+            // Создаём подписку с криптостойким кодом (разные ключи для разных планов)
+            const accessCode = generateAccessCode(plan);
             const expiresAt = calculateExpiryDate(days);
 
             await db.createSubscription({
