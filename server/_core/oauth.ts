@@ -142,8 +142,8 @@ export function registerOAuthRoutes(app: Express) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code,
-          client_id: process.env.VITE_GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          client_id: ENV.googleClientId,
+          client_secret: ENV.googleClientSecret,
           redirect_uri: `${ENV.baseUrl}/api/auth/google/callback`,
           grant_type: "authorization_code",
         }),
@@ -152,6 +152,7 @@ export function registerOAuthRoutes(app: Express) {
       const tokenData = await tokenResponse.json();
 
       if (!tokenData.access_token) {
+        console.error("[Google Auth] Token exchange failed:", tokenData);
         res.redirect("/?error=token_failed");
         return;
       }
@@ -211,8 +212,8 @@ export function registerOAuthRoutes(app: Express) {
 
       // Обмениваем code на access token
       const tokenUrl = new URL("https://oauth.vk.com/access_token");
-      tokenUrl.searchParams.set("client_id", process.env.VITE_VK_APP_ID || "");
-      tokenUrl.searchParams.set("client_secret", process.env.VK_APP_SECRET || "");
+      tokenUrl.searchParams.set("client_id", ENV.vkAppId);
+      tokenUrl.searchParams.set("client_secret", ENV.vkAppSecret);
       tokenUrl.searchParams.set("redirect_uri", `${ENV.baseUrl}/api/auth/vk/callback`);
       tokenUrl.searchParams.set("code", code);
 
@@ -220,6 +221,7 @@ export function registerOAuthRoutes(app: Express) {
       const tokenData = await tokenResponse.json();
 
       if (!tokenData.access_token || !tokenData.user_id) {
+        console.error("[VK Auth] Token exchange failed:", tokenData);
         res.redirect("/?error=token_failed");
         return;
       }

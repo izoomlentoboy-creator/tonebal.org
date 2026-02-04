@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Volume2, Mail, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 
@@ -20,12 +20,13 @@ export default function Login() {
   const [showEmailForm, setShowEmailForm] = useState(false);
 
   // Если пользователь уже авторизован, редиректим на dashboard
-  if (!loading && isAuthenticated) {
-    setLocation("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      setLocation("/dashboard");
+    }
+  }, [loading, isAuthenticated, setLocation]);
 
-  if (loading) {
+  if (loading || isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -56,6 +57,7 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ email: email.trim(), name: name.trim() || undefined }),
       });
 
