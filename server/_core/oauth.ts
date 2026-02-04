@@ -217,9 +217,9 @@ export function registerOAuthRoutes(app: Express) {
           grant_type: "authorization_code",
           code,
           client_id: "54441764",
+          client_secret: process.env.VK_APP_SECRET || "",
           device_id: device_id || "",
           redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
-          code_verifier: "",
         }).toString(),
       });
 
