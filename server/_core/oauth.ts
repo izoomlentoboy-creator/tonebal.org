@@ -1,5 +1,5 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
-import type { Application, Request, Response } from "express";
+import type { Application, Request, Response } from "../types";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";

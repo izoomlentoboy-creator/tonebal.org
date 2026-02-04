@@ -1,5 +1,6 @@
 import "dotenv/config";
-import express, { type Request, type Response } from "express";
+import express from "express";
+import type { Request, Response } from "../types";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
