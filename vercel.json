@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build",
-  "installCommand": "corepack enable && pnpm install",
   "outputDirectory": "dist/public",
   "functions": {
     "api/**/*.ts": {
