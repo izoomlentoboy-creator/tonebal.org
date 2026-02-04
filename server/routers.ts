@@ -425,6 +425,75 @@ export const appRouter = router({
       }),
   }),
 
+  // Activity & Statistics
+  activity: router({
+    // Get practice calendar data
+    getCalendar: protectedProcedure
+      .input(z.object({
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const endDate = input?.endDate || new Date().toISOString().split("T")[0];
+        const startDate = input?.startDate || (() => {
+          const d = new Date();
+          d.setMonth(d.getMonth() - 3);
+          return d.toISOString().split("T")[0];
+        })();
+
+        return await db.getDailyActivity(ctx.user.id, startDate, endDate);
+      }),
+
+    // Get today's progress
+    getTodayProgress: protectedProcedure.query(async ({ ctx }) => {
+      const today = new Date().toISOString().split("T")[0];
+      const dailyProgress = await db.getDailyProgress(ctx.user.id, today);
+
+      // Get nosology info for each progress item
+      const result = dailyProgress.map(dp => {
+        const nosology = nosologiesData[dp.nosologyId as keyof typeof nosologiesData];
+        return {
+          ...dp,
+          nosologyName: nosology?.name || dp.nosologyId,
+          nosologyIcon: nosology?.icon || "📚",
+          nosologyColor: nosology?.color || "#6366f1",
+        };
+      });
+
+      return result;
+    }),
+
+    // Record practice activity
+    recordActivity: protectedProcedure
+      .input(z.object({
+        nosologyId: z.string(),
+        lessonId: z.string(),
+        durationMinutes: z.number().min(0),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const today = new Date().toISOString().split("T")[0];
+        const nosology = nosologiesData[input.nosologyId as keyof typeof nosologiesData];
+        const totalLessons = nosology?.lessonCount || 1;
+
+        // Update daily activity
+        await db.upsertDailyActivity(ctx.user.id, today, input.durationMinutes, input.nosologyId);
+
+        // Update daily progress for this nosology
+        await db.upsertDailyProgress(ctx.user.id, input.nosologyId, today, totalLessons);
+
+        // Also mark lesson as complete in overall progress
+        await db.markLessonComplete(ctx.user.id, input.nosologyId, input.lessonId);
+
+        return { success: true };
+      }),
+
+    // Get statistics summary
+    getStats: protectedProcedure.query(async ({ ctx }) => {
+      const stats = await db.getUserStats(ctx.user.id);
+      return stats;
+    }),
+  }),
+
   // User management
   user: router({
     updatePassword: protectedProcedure

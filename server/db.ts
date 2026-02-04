@@ -1,14 +1,18 @@
-import { eq } from "drizzle-orm";
+import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertUser, 
-  users, 
-  subscriptions, 
+import {
+  InsertUser,
+  users,
+  subscriptions,
   InsertSubscription,
   payments,
   InsertPayment,
   userProgress,
-  InsertUserProgress
+  InsertUserProgress,
+  dailyActivity,
+  InsertDailyActivity,
+  dailyProgress,
+  InsertDailyProgress
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -226,4 +230,184 @@ export async function getUserById(userId: number) {
     .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+// Daily Activity
+export async function getDailyActivity(userId: number, startDate: string, endDate: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(dailyActivity)
+    .where(
+      and(
+        eq(dailyActivity.userId, userId),
+        gte(dailyActivity.date, startDate),
+        lte(dailyActivity.date, endDate)
+      )
+    )
+    .orderBy(dailyActivity.date);
+}
+
+export async function upsertDailyActivity(
+  userId: number,
+  date: string,
+  minutesToAdd: number,
+  nosologyId: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Get existing activity
+  const existing = await db
+    .select()
+    .from(dailyActivity)
+    .where(and(eq(dailyActivity.userId, userId), eq(dailyActivity.date, date)))
+    .limit(1);
+
+  if (existing.length > 0) {
+    const current = existing[0];
+    const currentNosologies = current.nosologiesWorked
+      ? JSON.parse(current.nosologiesWorked)
+      : [];
+
+    if (!currentNosologies.includes(nosologyId)) {
+      currentNosologies.push(nosologyId);
+    }
+
+    await db
+      .update(dailyActivity)
+      .set({
+        lessonsCompleted: sql`${dailyActivity.lessonsCompleted} + 1`,
+        totalMinutes: sql`${dailyActivity.totalMinutes} + ${minutesToAdd}`,
+        nosologiesWorked: JSON.stringify(currentNosologies),
+      })
+      .where(and(eq(dailyActivity.userId, userId), eq(dailyActivity.date, date)));
+  } else {
+    await db.insert(dailyActivity).values({
+      userId,
+      date,
+      lessonsCompleted: 1,
+      totalMinutes: minutesToAdd,
+      nosologiesWorked: JSON.stringify([nosologyId]),
+    });
+  }
+}
+
+// Daily Progress
+export async function getDailyProgress(userId: number, date: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(dailyProgress)
+    .where(and(eq(dailyProgress.userId, userId), eq(dailyProgress.date, date)));
+}
+
+export async function upsertDailyProgress(
+  userId: number,
+  nosologyId: string,
+  date: string,
+  totalLessons: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .insert(dailyProgress)
+    .values({
+      userId,
+      nosologyId,
+      date,
+      lessonsCompleted: 1,
+      totalLessons,
+    })
+    .onDuplicateKeyUpdate({
+      set: {
+        lessonsCompleted: sql`${dailyProgress.lessonsCompleted} + 1`,
+      },
+    });
+}
+
+// User Statistics
+export async function getUserStats(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    return {
+      totalDays: 0,
+      totalLessons: 0,
+      totalMinutes: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+    };
+  }
+
+  // Get all activity
+  const activity = await db
+    .select()
+    .from(dailyActivity)
+    .where(eq(dailyActivity.userId, userId))
+    .orderBy(dailyActivity.date);
+
+  // Get completed lessons count
+  const completedLessons = await db
+    .select()
+    .from(userProgress)
+    .where(and(eq(userProgress.userId, userId), eq(userProgress.completed, 1)));
+
+  const totalDays = activity.length;
+  const totalLessons = completedLessons.length;
+  const totalMinutes = activity.reduce((sum, a) => sum + a.totalMinutes, 0);
+
+  // Calculate streaks
+  let currentStreak = 0;
+  let bestStreak = 0;
+  let tempStreak = 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const practiceSet = new Set(activity.map(a => a.date));
+
+  // Current streak (from today backwards)
+  for (let i = 0; i <= 365; i++) {
+    const checkDate = new Date(today);
+    checkDate.setDate(checkDate.getDate() - i);
+    const dateStr = checkDate.toISOString().split("T")[0];
+    if (practiceSet.has(dateStr)) {
+      currentStreak++;
+    } else if (i > 0) {
+      break;
+    }
+  }
+
+  // Best streak
+  const sortedDates = Array.from(practiceSet).sort();
+  for (let i = 0; i < sortedDates.length; i++) {
+    if (i === 0) {
+      tempStreak = 1;
+    } else {
+      const prevDate = new Date(sortedDates[i - 1]);
+      const currDate = new Date(sortedDates[i]);
+      const diffDays = (currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
+
+      if (diffDays === 1) {
+        tempStreak++;
+      } else {
+        bestStreak = Math.max(bestStreak, tempStreak);
+        tempStreak = 1;
+      }
+    }
+  }
+  bestStreak = Math.max(bestStreak, tempStreak);
+
+  return {
+    totalDays,
+    totalLessons,
+    totalMinutes,
+    currentStreak,
+    bestStreak,
+  };
 }

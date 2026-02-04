@@ -2,28 +2,20 @@
   "version": 2,
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": "dist",
+  "outputDirectory": "dist/public",
   "functions": {
-    "dist/index.js": {
-      "runtime": "@vercel/node@3",
+    "api/**/*.ts": {
       "maxDuration": 30
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/dist/index.js"
+      "source": "/api/:path*",
+      "destination": "/api/index.ts"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/public/assets/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/index.html"
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }
