@@ -1,6 +1,5 @@
 import "dotenv/config";
-import express from "express";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import express, { Request, Response } from "express";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "../server/_core/oauth";
 import { appRouter } from "../server/routers";
@@ -89,6 +88,6 @@ app.use(
 );
 
 // Vercel serverless function handler
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  return app(req as any, res as any);
+export default function handler(req: Request, res: Response) {
+  return app(req, res);
 }
