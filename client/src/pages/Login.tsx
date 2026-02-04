@@ -1,12 +1,11 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { AppleSignInButton } from "@/components/AppleSignInButton";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { VKSignInButton } from "@/components/VKSignInButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Volume2, Mail, ArrowLeft } from "lucide-react";
+import { Mail, ArrowLeft, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
@@ -27,7 +26,7 @@ export default function Login() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -77,57 +76,56 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-hero flex flex-col">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center">
+      <header className="bg-transparent">
+        <div className="container flex h-20 items-center">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <ArrowLeft className="h-5 w-5" />
-            <Volume2 className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">ToneBalance</span>
+            <ArrowLeft className="h-5 w-5 text-[#1a4d3e]" />
+            <span className="text-2xl font-serif font-bold text-[#1a4d3e] italic">Tone Balance</span>
           </Link>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Вход в ToneBalance</CardTitle>
-            <CardDescription>
+        <Card className="w-full max-w-md glass-card-modern border-0 shadow-xl">
+          <CardHeader className="text-center pb-2">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#1a4d3e] flex items-center justify-center">
+              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+            </div>
+            <CardTitle className="text-2xl font-serif text-[#1a4d3e]">Вход в ToneBalance</CardTitle>
+            <CardDescription className="text-[#1a4d3e]/60">
               Выберите способ авторизации для доступа к программам
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 pt-4">
             {!showEmailForm ? (
               <>
-                {/* Apple Sign In */}
-                <AppleSignInButton
-                  className="w-full"
+                {/* Google Sign In - Primary */}
+                <GoogleSignInButton
+                  className="w-full h-12 rounded-xl text-base"
                   size="lg"
                   variant="default"
                 />
 
-                {/* Google Sign In */}
-                <GoogleSignInButton
-                  className="w-full"
-                  size="lg"
-                  variant="outline"
-                />
-
                 {/* VK Sign In */}
                 <VKSignInButton
-                  className="w-full"
+                  className="w-full h-12 rounded-xl text-base"
                   size="lg"
                   variant="outline"
                 />
 
-                <div className="relative">
+                <div className="relative py-2">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
+                    <span className="w-full border-t border-[#1a4d3e]/10" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
+                    <span className="bg-white/60 px-3 text-[#1a4d3e]/50 rounded-full">
                       или
                     </span>
                   </div>
@@ -137,7 +135,7 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full"
+                  className="w-full h-12 rounded-xl text-base border-[#1a4d3e]/20 text-[#1a4d3e] hover:bg-[#1a4d3e]/5"
                   onClick={() => setShowEmailForm(true)}
                 >
                   <Mail className="mr-2 h-5 w-5" />
@@ -149,7 +147,7 @@ export default function Login() {
                 {/* Email Form */}
                 <form onSubmit={handleEmailLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email" className="text-[#1a4d3e]">Email *</Label>
                     <Input
                       id="email"
                       type="email"
@@ -159,11 +157,12 @@ export default function Login() {
                       required
                       autoComplete="email"
                       autoFocus
+                      className="h-12 rounded-xl border-[#1a4d3e]/20 focus:border-[#1a4d3e] focus:ring-[#1a4d3e]"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="name">Имя (необязательно)</Label>
+                    <Label htmlFor="name" className="text-[#1a4d3e]">Имя (необязательно)</Label>
                     <Input
                       id="name"
                       type="text"
@@ -171,13 +170,14 @@ export default function Login() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       autoComplete="name"
+                      className="h-12 rounded-xl border-[#1a4d3e]/20 focus:border-[#1a4d3e] focus:ring-[#1a4d3e]"
                     />
                   </div>
 
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full"
+                    className="w-full h-12 rounded-xl text-base bg-[#1a4d3e] hover:bg-[#1a4d3e]/90"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -186,14 +186,17 @@ export default function Login() {
                         Входим...
                       </>
                     ) : (
-                      "Войти"
+                      <>
+                        Войти
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </>
                     )}
                   </Button>
                 </form>
 
                 <Button
                   variant="ghost"
-                  className="w-full"
+                  className="w-full text-[#1a4d3e]/70 hover:text-[#1a4d3e] hover:bg-[#1a4d3e]/5"
                   onClick={() => setShowEmailForm(false)}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
@@ -202,16 +205,19 @@ export default function Login() {
               </>
             )}
 
-            <p className="text-xs text-center text-muted-foreground">
-              Продолжая, вы соглашаетесь с условиями использования сервиса
+            <p className="text-xs text-center text-[#1a4d3e]/50 pt-2">
+              Продолжая, вы соглашаетесь с{" "}
+              <Link href="/terms" className="underline hover:text-[#1a4d3e]">
+                условиями использования
+              </Link>
             </p>
           </CardContent>
         </Card>
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-4">
-        <div className="container text-center text-sm text-muted-foreground">
+      <footer className="py-6">
+        <div className="container text-center text-sm text-[#1a4d3e]/50">
           <p>© 2026 ToneBalance. Все права защищены.</p>
         </div>
       </footer>
