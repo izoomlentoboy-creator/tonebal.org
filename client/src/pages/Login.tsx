@@ -1,5 +1,4 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { AppleSignInButton } from "@/components/AppleSignInButton";
 import { VKSignInButton } from "@/components/VKSignInButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Volume2, ArrowLeft } from "lucide-react";
@@ -44,28 +43,10 @@ export default function Login() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Вход в ToneBalance</CardTitle>
             <CardDescription>
-              Выберите способ авторизации для доступа к программам
+              Войдите для доступа к программам
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Apple Sign In */}
-            <AppleSignInButton
-              className="w-full"
-              size="lg"
-              variant="default"
-            />
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  или
-                </span>
-              </div>
-            </div>
-
             {/* VK Sign In */}
             <VKSignInButton className="w-full" />
 
