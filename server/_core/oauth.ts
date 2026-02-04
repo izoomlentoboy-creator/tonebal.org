@@ -199,7 +199,85 @@ export function registerOAuthRoutes(app: Express) {
     }
   });
 
-  // VK OAuth callback
+  // VK ID SDK callback (POST - новый метод через VK ID SDK)
+  app.post("/api/auth/vk/callback", async (req: Request, res: Response) => {
+    try {
+      const { code, device_id } = req.body;
+
+      if (!code || typeof code !== "string") {
+        res.status(400).json({ error: "Code is required" });
+        return;
+      }
+
+      // Обмениваем code на access token через VK ID API
+      const tokenResponse = await fetch("https://id.vk.com/oauth2/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          code,
+          client_id: "54441764",
+          device_id: device_id || "",
+          redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
+          code_verifier: "",
+        }).toString(),
+      });
+
+      const tokenData = await tokenResponse.json();
+
+      if (!tokenData.access_token || !tokenData.user_id) {
+        console.error("[VK ID] Token exchange failed:", tokenData);
+        res.status(400).json({ error: "Token exchange failed" });
+        return;
+      }
+
+      // Получаем информацию о пользователе
+      const userUrl = new URL("https://api.vk.com/method/users.get");
+      userUrl.searchParams.set("user_ids", tokenData.user_id.toString());
+      userUrl.searchParams.set("fields", "photo_200");
+      userUrl.searchParams.set("access_token", tokenData.access_token);
+      userUrl.searchParams.set("v", "5.131");
+
+      const userResponse = await fetch(userUrl.toString());
+      const userData = await userResponse.json();
+
+      if (!userData.response || !userData.response[0]) {
+        res.status(400).json({ error: "Failed to get user data" });
+        return;
+      }
+
+      const vkUser = userData.response[0];
+      const vkUserId = `vk_${vkUser.id}`;
+      const userName = `${vkUser.first_name} ${vkUser.last_name}`.trim();
+      const userEmail = tokenData.email || null;
+
+      // Создаем или обновляем пользователя
+      await db.upsertUser({
+        openId: vkUserId,
+        name: userName || null,
+        email: userEmail,
+        loginMethod: "vk",
+        lastSignedIn: new Date(),
+      });
+
+      // Создаем сессию
+      const sessionToken = await sdk.createSessionToken(vkUserId, {
+        name: userName,
+        expiresInMs: ONE_YEAR_MS,
+      });
+
+      // Устанавливаем cookie
+      const cookieOptions = getSessionCookieOptions(req);
+      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      res.json({ success: true, userId: vkUserId });
+    } catch (error) {
+      console.error("[VK ID Auth] Callback failed", error);
+      res.status(500).json({ error: "Authentication failed" });
+    }
+  });
+
+  // VK OAuth callback (GET - старый метод, для совместимости)
   app.get("/api/auth/vk/callback", async (req: Request, res: Response) => {
     try {
       const { code } = req.query;
