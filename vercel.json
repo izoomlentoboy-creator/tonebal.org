@@ -16,7 +16,11 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
+    {
+      "src": "/api/auth/vk/callback",
+      "dest": "/api/auth/vk/callback.ts",
+      "methods": ["POST", "OPTIONS"]
+    },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
