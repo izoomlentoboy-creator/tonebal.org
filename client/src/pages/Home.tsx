@@ -151,102 +151,105 @@ export default function Home() {
 
           {/* Phone mockup */}
           <div className="relative flex justify-center">
-            <div className="relative z-10 bg-slate-800 rounded-[2.5rem] shadow-2xl p-3 transform rotate-1 hover:rotate-0 transition-all duration-500">
-              {/* Phone notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-800 rounded-b-2xl z-20"></div>
-
-              <div className="rounded-[2rem] overflow-hidden bg-white w-72 aspect-[9/19] relative">
-                {/* Status bar */}
-                <div className="flex items-center justify-between px-6 pt-3 pb-2">
-                  <span className="text-xs font-semibold text-slate-800">17:46</span>
-                  <div className="w-24 h-6 bg-slate-900 rounded-full"></div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-4 h-4 flex items-center justify-center">
-                      <div className="w-3 h-2 border border-slate-600 rounded-sm relative">
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 -right-0.5 w-0.5 h-1 bg-slate-600 rounded-r"></div>
+            {/* Main phone */}
+            <div className="relative z-10 transform hover:scale-[1.02] transition-all duration-500">
+              {/* Phone frame */}
+              <div className="relative bg-slate-700 rounded-[3rem] p-[10px] shadow-2xl shadow-slate-400/30">
+                {/* Screen */}
+                <div className="rounded-[2.4rem] overflow-hidden bg-white w-[280px]" style={{ aspectRatio: '9/19.2' }}>
+                  {/* Status bar */}
+                  <div className="flex items-center justify-between px-5 pt-3 pb-1 relative">
+                    <span className="text-sm font-semibold text-slate-900">17:46</span>
+                    {/* Dynamic Island */}
+                    <div className="absolute left-1/2 -translate-x-1/2 top-2 w-[90px] h-[28px] bg-slate-900 rounded-full"></div>
+                    {/* Battery */}
+                    <div className="flex items-center gap-0.5">
+                      <div className="w-[22px] h-[11px] border-[1.5px] border-slate-400 rounded-[3px] relative flex items-center p-[2px]">
+                        <div className="w-[60%] h-full bg-slate-400 rounded-[1px]"></div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div className="px-4 pb-3">
-                  <div className="flex gap-1">
-                    <div className="h-1 flex-1 bg-green-500 rounded-full"></div>
-                    <div className="h-1 flex-1 bg-violet-500 rounded-full"></div>
-                    <div className="h-1 flex-1 bg-slate-200 rounded-full"></div>
-                    <div className="h-1 flex-1 bg-slate-200 rounded-full"></div>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="px-4 pb-4">
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">Выберите ваше направление</h3>
-                  <p className="text-[10px] text-slate-500 mb-3">Это поможет подобрать персональную программу упражнений</p>
-
-                  {/* Program cards grid */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Card 1 */}
-                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
-                      <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center mb-2">
-                        <Wind size={14} className="text-violet-600" />
-                      </div>
-                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Дыхательная гимнастика</p>
-                      <p className="text-[9px] text-violet-600 mt-0.5">10 уроков</p>
-                    </div>
-
-                    {/* Card 2 */}
-                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
-                      <div className="w-8 h-8 rounded-xl bg-fuchsia-100 flex items-center justify-center mb-2">
-                        <Mic size={14} className="text-fuchsia-600" />
-                      </div>
-                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Постановка голоса и речи</p>
-                      <p className="text-[9px] text-violet-600 mt-0.5">14 уроков</p>
-                    </div>
-
-                    {/* Card 3 */}
-                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
-                      <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center mb-2">
-                        <BarChart3 size={14} className="text-purple-600" />
-                      </div>
-                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Парезы гортани</p>
-                      <p className="text-[9px] text-violet-600 mt-0.5">15 уроков</p>
-                    </div>
-
-                    {/* Card 4 */}
-                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
-                      <div className="w-8 h-8 rounded-xl bg-pink-100 flex items-center justify-center mb-2">
-                        <Heart size={14} className="text-pink-600" />
-                      </div>
-                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Дисфагия</p>
-                      <p className="text-[9px] text-violet-600 mt-0.5">6 уроков</p>
+                      <div className="w-[2px] h-[5px] bg-slate-400 rounded-r-sm"></div>
                     </div>
                   </div>
 
-                  {/* Bottom navigation */}
-                  <div className="flex gap-2 mt-3">
-                    <div className="w-10 h-10 border border-slate-200 rounded-xl flex items-center justify-center">
-                      <ArrowRight size={14} className="text-slate-400 rotate-180" />
+                  {/* Progress segments */}
+                  <div className="flex gap-1.5 px-5 pt-2 pb-4">
+                    <div className="h-[5px] flex-1 bg-emerald-500 rounded-full"></div>
+                    <div className="h-[5px] flex-1 bg-violet-500 rounded-full"></div>
+                    <div className="h-[5px] flex-1 bg-slate-200 rounded-full"></div>
+                    <div className="h-[5px] flex-1 bg-slate-200 rounded-full"></div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="px-5 pb-5">
+                    <h3 className="text-xl font-bold text-slate-900 leading-tight mb-1">Выберите ваше направление</h3>
+                    <p className="text-xs text-slate-400 mb-4 leading-snug">Это поможет подобрать персональную программу упражнений</p>
+
+                    {/* Program cards */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {/* Card 1 - Дыхательная гимнастика */}
+                      <div className="bg-slate-50/80 rounded-2xl p-3">
+                        <div className="w-10 h-10 rounded-2xl bg-violet-100 flex items-center justify-center mb-2">
+                          <Wind size={18} className="text-violet-500" />
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-800 leading-tight mb-0.5">Дыхательная гимнастика</p>
+                        <p className="text-[10px] text-violet-500 font-medium">10 уроков</p>
+                      </div>
+
+                      {/* Card 2 - Постановка голоса */}
+                      <div className="bg-slate-50/80 rounded-2xl p-3">
+                        <div className="w-10 h-10 rounded-2xl bg-violet-100 flex items-center justify-center mb-2">
+                          <Mic size={18} className="text-violet-500" />
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-800 leading-tight mb-0.5">Постановка голоса и речи</p>
+                        <p className="text-[10px] text-violet-500 font-medium">14 уроков</p>
+                      </div>
+
+                      {/* Card 3 - Парезы гортани */}
+                      <div className="bg-slate-50/80 rounded-2xl p-3">
+                        <div className="w-10 h-10 rounded-2xl bg-violet-100 flex items-center justify-center mb-2">
+                          <BarChart3 size={18} className="text-violet-500" />
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-800 leading-tight mb-0.5">Парезы гортани</p>
+                        <p className="text-[10px] text-violet-500 font-medium">15 уроков</p>
+                      </div>
+
+                      {/* Card 4 - Дисфагия */}
+                      <div className="bg-slate-50/80 rounded-2xl p-3">
+                        <div className="w-10 h-10 rounded-2xl bg-pink-100 flex items-center justify-center mb-2">
+                          <Heart size={18} className="text-pink-500" />
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-800 leading-tight mb-0.5">Дисфагия</p>
+                        <p className="text-[10px] text-violet-500 font-medium">6 уроков</p>
+                      </div>
                     </div>
-                    <div className="flex-1 h-10 bg-slate-200 rounded-xl flex items-center justify-center">
-                      <span className="text-[10px] text-slate-400 font-medium">Далее</span>
-                      <ArrowRight size={12} className="text-slate-400 ml-1" />
+
+                    {/* Bottom buttons */}
+                    <div className="flex gap-2 mt-4">
+                      <div className="w-12 h-12 border border-slate-200 rounded-2xl flex items-center justify-center bg-white">
+                        <ArrowRight size={18} className="text-slate-400 rotate-180" />
+                      </div>
+                      <div className="flex-1 h-12 bg-slate-200 rounded-2xl flex items-center justify-center gap-1">
+                        <span className="text-sm text-slate-400 font-medium">Далее</span>
+                        <ArrowRight size={16} className="text-slate-400" />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Second phone - smaller, showing lesson screen */}
-            <div className="absolute -left-12 bottom-8 z-0 bg-slate-700 rounded-[2rem] shadow-xl p-2 transform -rotate-6 opacity-90 hidden lg:block">
-              <div className="rounded-[1.5rem] overflow-hidden bg-gradient-to-b from-slate-50 to-violet-50 w-44 aspect-[9/16] p-3">
-                <div className="space-y-2">
-                  <div className="h-1.5 w-12 bg-slate-200 rounded"></div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <div className="aspect-square rounded-lg bg-violet-100"></div>
-                    <div className="aspect-square rounded-lg bg-pink-100"></div>
-                    <div className="aspect-square rounded-lg bg-blue-100"></div>
-                    <div className="aspect-square rounded-lg bg-green-100"></div>
+            {/* Second phone - smaller */}
+            <div className="absolute -left-16 bottom-12 z-0 transform -rotate-6 hidden lg:block">
+              <div className="bg-slate-600 rounded-[2.5rem] p-2 shadow-xl opacity-80">
+                <div className="rounded-[2rem] overflow-hidden bg-gradient-to-b from-slate-50 to-violet-50/50 w-48" style={{ aspectRatio: '9/19' }}>
+                  <div className="p-4 pt-8">
+                    <div className="h-2 w-14 bg-slate-200 rounded mb-3"></div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="aspect-square rounded-xl bg-violet-100/80"></div>
+                      <div className="aspect-square rounded-xl bg-pink-100/80"></div>
+                      <div className="aspect-square rounded-xl bg-emerald-100/80"></div>
+                      <div className="aspect-square rounded-xl bg-blue-100/80"></div>
+                    </div>
                   </div>
                 </div>
               </div>
