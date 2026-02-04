@@ -50,9 +50,21 @@ export default function Login() {
             {/* VK Sign In */}
             <VKSignInButton className="w-full" />
 
-            <p className="text-xs text-center text-muted-foreground">
-              Продолжая, вы соглашаетесь с условиями использования сервиса
-            </p>
+            <div className="text-xs text-center text-muted-foreground space-y-2">
+              <p>
+                При входе через ВКонтакте мы получаем доступ к вашему имени, фамилии и email.
+              </p>
+              <p>
+                Продолжая, вы соглашаетесь с{" "}
+                <Link href="/privacy" className="underline hover:text-foreground">
+                  политикой конфиденциальности
+                </Link>
+                {" "}и{" "}
+                <Link href="/terms" className="underline hover:text-foreground">
+                  условиями использования
+                </Link>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </main>
