@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "framework": null,
+  "framework": "vite",
   "installCommand": "pnpm install --prod=false",
-  "buildCommand": "pnpm run build",
+  "buildCommand": "vite build",
   "outputDirectory": "dist/public"
 }
