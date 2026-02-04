@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Exchange code for access token via VK ID API
-    const tokenResponse = await fetch("https://id.vk.com/oauth2/auth", {
+    const tokenResponse = await fetch("https://id.vk.com/oauth2/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
@@ -56,6 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         client_secret: VK_APP_SECRET,
         device_id: device_id || "",
         redirect_uri: `${BASE_URL}/api/auth/vk/callback`,
+        state: "",
       }).toString(),
     });
 
