@@ -147,81 +147,104 @@ export default function Home() {
               )}
             </div>
 
-            <div className="pt-4 flex items-center gap-4 text-sm text-slate-500 font-medium">
-              <div className="flex -space-x-2">
-                {['#a78bfa', '#f0abfc', '#818cf8', '#c084fc'].map((color, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: color }}
-                  >
-                    {['А', 'М', 'И', 'К'][i]}
-                  </div>
-                ))}
-              </div>
-              <p>Более 1,000 пользователей</p>
-            </div>
           </div>
 
           {/* Phone mockup */}
           <div className="relative flex justify-center">
-            <div className="relative z-10 bg-white rounded-3xl shadow-2xl border border-slate-100 p-3 transform rotate-2 hover:rotate-0 transition-all duration-500">
-              <div className="rounded-2xl overflow-hidden bg-gradient-to-b from-violet-50 to-fuchsia-50 w-72 aspect-[9/16] relative">
-                {/* Phone header */}
-                <div className="absolute top-0 left-0 right-0 h-6 bg-black/5 flex justify-center items-end pb-1">
-                  <div className="w-20 h-4 bg-black/20 rounded-full"></div>
-                </div>
+            <div className="relative z-10 bg-slate-800 rounded-[2.5rem] shadow-2xl p-3 transform rotate-1 hover:rotate-0 transition-all duration-500">
+              {/* Phone notch */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-800 rounded-b-2xl z-20"></div>
 
-                {/* App content preview */}
-                <div className="p-4 pt-10 space-y-4">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white mb-3">
-                      <Wind size={28} />
+              <div className="rounded-[2rem] overflow-hidden bg-white w-72 aspect-[9/19] relative">
+                {/* Status bar */}
+                <div className="flex items-center justify-between px-6 pt-3 pb-2">
+                  <span className="text-xs font-semibold text-slate-800">17:46</span>
+                  <div className="w-24 h-6 bg-slate-900 rounded-full"></div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 flex items-center justify-center">
+                      <div className="w-3 h-2 border border-slate-600 rounded-sm relative">
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 -right-0.5 w-0.5 h-1 bg-slate-600 rounded-r"></div>
+                      </div>
                     </div>
-                    <p className="font-bold text-slate-800">Диафрагмальное дыхание</p>
-                    <p className="text-xs text-slate-500">(базовое)</p>
-                  </div>
-
-                  <div className="flex gap-2 justify-center text-xs">
-                    <span className="px-3 py-1 rounded-full bg-violet-100 text-violet-700 font-medium">8 мин</span>
-                    <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600">Видео</span>
-                  </div>
-
-                  <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 space-y-2">
-                    <div className="h-2 w-full bg-slate-100 rounded"></div>
-                    <div className="h-2 w-4/5 bg-slate-100 rounded"></div>
-                    <div className="h-2 w-3/5 bg-slate-100 rounded"></div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <div className="flex-1 h-10 bg-violet-600 rounded-xl"></div>
-                    <div className="w-10 h-10 border border-slate-200 rounded-xl"></div>
                   </div>
                 </div>
 
-                {/* Floating card */}
-                <div className="absolute -bottom-4 -right-4 bg-white p-3 rounded-xl shadow-xl border border-slate-50">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-                      <Check size={14} />
+                {/* Progress bar */}
+                <div className="px-4 pb-3">
+                  <div className="flex gap-1">
+                    <div className="h-1 flex-1 bg-green-500 rounded-full"></div>
+                    <div className="h-1 flex-1 bg-violet-500 rounded-full"></div>
+                    <div className="h-1 flex-1 bg-slate-200 rounded-full"></div>
+                    <div className="h-1 flex-1 bg-slate-200 rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="px-4 pb-4">
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">Выберите ваше направление</h3>
+                  <p className="text-[10px] text-slate-500 mb-3">Это поможет подобрать персональную программу упражнений</p>
+
+                  {/* Program cards grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Card 1 */}
+                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center mb-2">
+                        <Wind size={14} className="text-violet-600" />
+                      </div>
+                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Дыхательная гимнастика</p>
+                      <p className="text-[9px] text-violet-600 mt-0.5">10 уроков</p>
                     </div>
-                    <div>
-                      <p className="text-[10px] text-slate-400 font-semibold uppercase">Урок</p>
-                      <p className="text-xs font-bold text-slate-800">Завершён</p>
+
+                    {/* Card 2 */}
+                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-fuchsia-100 flex items-center justify-center mb-2">
+                        <Mic size={14} className="text-fuchsia-600" />
+                      </div>
+                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Постановка голоса и речи</p>
+                      <p className="text-[9px] text-violet-600 mt-0.5">14 уроков</p>
+                    </div>
+
+                    {/* Card 3 */}
+                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center mb-2">
+                        <BarChart3 size={14} className="text-purple-600" />
+                      </div>
+                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Парезы гортани</p>
+                      <p className="text-[9px] text-violet-600 mt-0.5">15 уроков</p>
+                    </div>
+
+                    {/* Card 4 */}
+                    <div className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-pink-100 flex items-center justify-center mb-2">
+                        <Heart size={14} className="text-pink-600" />
+                      </div>
+                      <p className="text-[10px] font-semibold text-slate-800 leading-tight">Дисфагия</p>
+                      <p className="text-[9px] text-violet-600 mt-0.5">6 уроков</p>
+                    </div>
+                  </div>
+
+                  {/* Bottom navigation */}
+                  <div className="flex gap-2 mt-3">
+                    <div className="w-10 h-10 border border-slate-200 rounded-xl flex items-center justify-center">
+                      <ArrowRight size={14} className="text-slate-400 rotate-180" />
+                    </div>
+                    <div className="flex-1 h-10 bg-slate-200 rounded-xl flex items-center justify-center">
+                      <span className="text-[10px] text-slate-400 font-medium">Далее</span>
+                      <ArrowRight size={12} className="text-slate-400 ml-1" />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Second phone - smaller */}
-            <div className="absolute -left-8 bottom-10 z-0 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 transform -rotate-6 opacity-80 hidden lg:block">
-              <div className="rounded-xl bg-gradient-to-b from-slate-50 to-violet-50 w-48 aspect-[9/16] p-3">
-                <div className="space-y-3">
-                  <div className="h-2 w-16 bg-slate-200 rounded"></div>
-                  <div className="grid grid-cols-2 gap-2">
+            {/* Second phone - smaller, showing lesson screen */}
+            <div className="absolute -left-12 bottom-8 z-0 bg-slate-700 rounded-[2rem] shadow-xl p-2 transform -rotate-6 opacity-90 hidden lg:block">
+              <div className="rounded-[1.5rem] overflow-hidden bg-gradient-to-b from-slate-50 to-violet-50 w-44 aspect-[9/16] p-3">
+                <div className="space-y-2">
+                  <div className="h-1.5 w-12 bg-slate-200 rounded"></div>
+                  <div className="grid grid-cols-2 gap-1.5">
                     <div className="aspect-square rounded-lg bg-violet-100"></div>
-                    <div className="aspect-square rounded-lg bg-fuchsia-100"></div>
+                    <div className="aspect-square rounded-lg bg-pink-100"></div>
                     <div className="aspect-square rounded-lg bg-blue-100"></div>
                     <div className="aspect-square rounded-lg bg-green-100"></div>
                   </div>
