@@ -262,7 +262,7 @@ export const appRouter = router({
           id: z.string(),
           status: z.string(),
           paid: z.boolean().optional(),
-          metadata: z.record(z.string()).optional(),
+          metadata: z.record(z.string(), z.string()).optional(),
         }),
       }))
       .mutation(async ({ input }) => {
@@ -279,8 +279,13 @@ export const appRouter = router({
           if (dbPayment && dbPayment.status !== "succeeded") {
             await db.updatePaymentStatus(object.id, "succeeded");
 
-            const accessCode = generateAccessCode();
-            const expiresAt = calculateExpiryDate(ENV.subscriptionDays);
+            // Определяем тип плана по nosology
+            const isYearly = dbPayment.nosology === "all_yearly";
+            const plan = isYearly ? "yearly" : "monthly";
+            const days = isYearly ? ENV.subscriptionYearlyDays : ENV.subscriptionDays;
+            
+            const accessCode = generateAccessCode(plan);
+            const expiresAt = calculateExpiryDate(days);
 
             await db.createSubscription({
               userId: dbPayment.userId,

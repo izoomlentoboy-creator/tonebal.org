@@ -89,8 +89,8 @@ export function validateAccessCode(code: string): {
   }
 
   // Проверяем символы
-  for (const char of cleanCode) {
-    if (!ALPHABET.includes(char)) {
+  for (let i = 0; i < cleanCode.length; i++) {
+    if (!ALPHABET.includes(cleanCode[i])) {
       return { valid: false, error: 'Invalid characters in code' };
     }
   }
@@ -120,8 +120,11 @@ export function validateAccessCode(code: string): {
  */
 export function isValidAccessCodeFormat(code: string): boolean {
   const cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
-  return cleanCode.length === CODE_LENGTH &&
-    [...cleanCode].every(char => ALPHABET.includes(char));
+  if (cleanCode.length !== CODE_LENGTH) return false;
+  for (let i = 0; i < cleanCode.length; i++) {
+    if (!ALPHABET.includes(cleanCode[i])) return false;
+  }
+  return true;
 }
 
 /**
