@@ -200,7 +200,7 @@ export function registerOAuthRoutes(app: Express) {
     }
   });
 
-  // VK OAuth callback
+  // VK OAuth callback (legacy - для обычного OAuth flow)
   app.get("/api/auth/vk/callback", async (req: Request, res: Response) => {
     try {
       const { code } = req.query;
@@ -269,6 +269,64 @@ export function registerOAuthRoutes(app: Express) {
       res.redirect("/dashboard");
     } catch (error) {
       console.error("[VK Auth] Callback failed", error);
+      res.redirect("/?error=auth_failed");
+    }
+  });
+
+  // VK ID SDK - обработка токена от клиентского SDK
+  app.get("/api/auth/vk/token", async (req: Request, res: Response) => {
+    try {
+      const { access_token, user_id, email } = req.query;
+
+      if (!access_token || !user_id) {
+        res.redirect("/?error=no_token");
+        return;
+      }
+
+      // Получаем информацию о пользователе через VK API
+      const userUrl = new URL("https://api.vk.com/method/users.get");
+      userUrl.searchParams.set("user_ids", user_id.toString());
+      userUrl.searchParams.set("fields", "photo_200");
+      userUrl.searchParams.set("access_token", access_token.toString());
+      userUrl.searchParams.set("v", "5.131");
+
+      const userResponse = await fetch(userUrl.toString());
+      const userData = await userResponse.json();
+
+      if (!userData.response || !userData.response[0]) {
+        console.error("[VK ID] User data failed:", userData);
+        res.redirect("/?error=user_data_failed");
+        return;
+      }
+
+      const vkUser = userData.response[0];
+      const vkUserId = `vk_${vkUser.id}`;
+      const userName = `${vkUser.first_name} ${vkUser.last_name}`.trim();
+      const userEmail = (email as string) || null;
+
+      // Создаем или обновляем пользователя
+      await db.upsertUser({
+        openId: vkUserId,
+        name: userName || null,
+        email: userEmail,
+        loginMethod: "vk",
+        lastSignedIn: new Date(),
+      });
+
+      // Создаем сессию
+      const sessionToken = await sdk.createSessionToken(vkUserId, {
+        name: userName,
+        expiresInMs: ONE_YEAR_MS,
+      });
+
+      // Устанавливаем cookie
+      const cookieOptions = getSessionCookieOptions(req);
+      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      // Редирект на dashboard
+      res.redirect("/dashboard");
+    } catch (error) {
+      console.error("[VK ID] Token auth failed", error);
       res.redirect("/?error=auth_failed");
     }
   });

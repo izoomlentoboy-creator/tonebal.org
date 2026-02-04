@@ -1,44 +1,121 @@
-import { Button } from "@/components/ui/button";
-import { getVKLoginUrl } from "@/const";
+import { useEffect, useRef } from "react";
+
+interface VKOneTapInstance {
+  render: (options: {
+    container: HTMLElement;
+    showAlternativeLogin: boolean;
+  }) => VKOneTapInstance;
+  on: (event: unknown, handler: (payload?: unknown) => void) => VKOneTapInstance;
+}
+
+interface VKIDSDK {
+  Config: {
+    init: (config: {
+      app: number;
+      redirectUrl: string;
+      responseMode: unknown;
+      source: unknown;
+      scope: string;
+    }) => void;
+  };
+  ConfigResponseMode: {
+    Callback: unknown;
+  };
+  ConfigSource: {
+    LOWCODE: unknown;
+  };
+  OneTap: new () => VKOneTapInstance;
+  WidgetEvents: {
+    ERROR: unknown;
+  };
+  OneTapInternalEvents: {
+    LOGIN_SUCCESS: unknown;
+  };
+  Auth: {
+    exchangeCode: (code: string, deviceId: string) => Promise<unknown>;
+  };
+}
+
+declare global {
+  interface Window {
+    VKIDSDK?: VKIDSDK;
+  }
+}
+
+const VK_APP_ID = 54441764;
+const VK_REDIRECT_URL = "https://tonebal.org/api/auth/vk/callback";
 
 interface VKSignInButtonProps {
   className?: string;
-  size?: "default" | "sm" | "lg" | "icon";
-  variant?: "default" | "outline" | "secondary" | "ghost";
 }
 
-export function VKSignInButton({
-  className,
-  size = "default",
-  variant = "outline",
-}: VKSignInButtonProps) {
-  return (
-    <Button
-      variant={variant}
-      size={size}
-      className={className}
-      asChild
-    >
-      <a href={getVKLoginUrl()} className="flex items-center gap-2">
-        <VKLogo className="h-5 w-5" />
-        <span>Войти через VK</span>
-      </a>
-    </Button>
-  );
-}
+export function VKSignInButton({ className }: VKSignInButtonProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
 
-// VK Logo SVG component
-function VKLogo({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M12.785 16.241s.288-.032.436-.193c.136-.148.132-.425.132-.425s-.019-1.297.574-1.488c.586-.188 1.339 1.253 2.137 1.807.603.418 1.061.327 1.061.327l2.134-.03s1.116-.07.587-.962c-.043-.073-.309-.662-1.588-1.872-1.34-1.267-1.16-1.062.453-3.254.983-1.334 1.376-2.148 1.253-2.496-.117-.332-.84-.244-.84-.244l-2.406.015s-.178-.025-.31.056c-.129.079-.212.263-.212.263s-.381 1.03-.889 1.907c-1.07 1.85-1.499 1.948-1.674 1.833-.407-.267-.305-1.075-.305-1.648 0-1.792.267-2.54-.52-2.733-.262-.064-.455-.106-1.126-.113-.861-.009-1.589.003-2.001.208-.274.136-.486.44-.357.458.16.022.522.099.714.364.248.342.239 1.11.239 1.11s.143 2.11-.333 2.371c-.327.179-.775-.187-1.739-1.862-.493-.854-.866-1.798-.866-1.798s-.072-.179-.2-.275c-.155-.116-.371-.153-.371-.153l-2.286.015s-.343.01-.469.161c-.112.134-.009.411-.009.411s1.791 4.257 3.818 6.403c1.857 1.967 3.965 1.837 3.965 1.837h.955z" />
-    </svg>
-  );
+  useEffect(() => {
+    if (initializedRef.current) return;
+
+    const initVKID = () => {
+      if (!window.VKIDSDK || !containerRef.current) return;
+
+      const VKID = window.VKIDSDK;
+
+      VKID.Config.init({
+        app: VK_APP_ID,
+        redirectUrl: VK_REDIRECT_URL,
+        responseMode: VKID.ConfigResponseMode.Callback,
+        source: VKID.ConfigSource.LOWCODE,
+        scope: "email",
+      });
+
+      const oneTap = new VKID.OneTap();
+
+      oneTap
+        .render({
+          container: containerRef.current,
+          showAlternativeLogin: true,
+        })
+        .on(VKID.WidgetEvents.ERROR, (error) => {
+          console.error("[VK ID] Error:", error);
+        })
+        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
+          const data = payload as { code: string; device_id: string };
+          const code = data.code;
+          const deviceId = data.device_id;
+
+          VKID.Auth.exchangeCode(code, deviceId)
+            .then((result) => {
+              console.log("[VK ID] Success:", result);
+              // Перенаправляем на сервер для создания сессии
+              const authData = result as { access_token: string; user_id: number; email?: string };
+              window.location.href = `/api/auth/vk/token?access_token=${authData.access_token}&user_id=${authData.user_id}&email=${authData.email || ""}`;
+            })
+            .catch((error) => {
+              console.error("[VK ID] Exchange error:", error);
+            });
+        });
+
+      initializedRef.current = true;
+    };
+
+    // Проверяем, загружен ли SDK
+    if (window.VKIDSDK) {
+      initVKID();
+    } else {
+      // Загружаем SDK динамически
+      const script = document.createElement("script");
+      script.src = "https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js";
+      script.async = true;
+      script.onload = () => {
+        // Даём время на инициализацию
+        setTimeout(initVKID, 100);
+      };
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  return <div ref={containerRef} className={className} />;
 }
 
 export default VKSignInButton;
