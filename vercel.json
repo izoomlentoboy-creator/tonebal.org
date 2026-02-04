@@ -3,23 +3,19 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/public",
   "framework": null,
-  "builds": [
-    {
-      "src": "server/_core/index.ts",
-      "use": "@vercel/node"
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@3"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "server/_core/index.ts"
+      "source": "/api/:path*",
+      "destination": "/api/index"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ],
   "env": {
