@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "pnpm install",
+  "installCommand": "pnpm install --prod=false",
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist/public",
   "rewrites": [
