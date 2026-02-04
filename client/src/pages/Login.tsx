@@ -1,23 +1,12 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { AppleSignInButton } from "@/components/AppleSignInButton";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { VKSignInButton } from "@/components/VKSignInButton";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Volume2, Mail, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { Volume2, ArrowLeft, Shield, CheckCircle2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { toast } from "sonner";
 
 export default function Login() {
   const { isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showEmailForm, setShowEmailForm] = useState(false);
 
   // Если пользователь уже авторизован, редиректим на dashboard
   if (!loading && isAuthenticated) {
@@ -27,59 +16,16 @@ export default function Login() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-purple-gradient-light">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!email.trim()) {
-      toast.error("Введите email");
-      return;
-    }
-
-    // Простая валидация email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Введите корректный email");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("/api/auth/email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: email.trim(), name: name.trim() || undefined }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Ошибка авторизации");
-      }
-
-      toast.success("Вы успешно вошли!");
-      // Редирект на dashboard
-      window.location.href = "/dashboard";
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error(error instanceof Error ? error.message : "Ошибка авторизации");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-purple-gradient-light flex flex-col">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="border-b glass sticky top-0 z-50">
         <div className="container flex h-16 items-center">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <ArrowLeft className="h-5 w-5" />
@@ -91,122 +37,71 @@ export default function Login() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Вход в ToneBalance</CardTitle>
-            <CardDescription>
-              Выберите способ авторизации для доступа к программам
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {!showEmailForm ? (
-              <>
-                {/* Apple Sign In */}
-                <AppleSignInButton
-                  className="w-full"
-                  size="lg"
-                  variant="default"
-                />
+        <div className="w-full max-w-md space-y-6">
+          <Card className="glass-card">
+            <CardHeader className="text-center pb-2">
+              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                <Volume2 className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Вход в ToneBalance</CardTitle>
+              <CardDescription>
+                Войдите через VK для доступа к программам голосовой реабилитации
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* VK Sign In */}
+              <VKSignInButton
+                className="w-full"
+                size="lg"
+                variant="default"
+              />
 
-                {/* Google Sign In */}
-                <GoogleSignInButton
-                  className="w-full"
-                  size="lg"
-                  variant="outline"
-                />
-
-                {/* VK Sign In */}
-                <VKSignInButton
-                  className="w-full"
-                  size="lg"
-                  variant="outline"
-                />
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                      или
-                    </span>
-                  </div>
+              {/* Security info */}
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <Shield className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>Мы не храним ваш пароль — авторизация происходит через VK</span>
                 </div>
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>Ваши данные защищены и используются только для идентификации</span>
+                </div>
+              </div>
 
-                {/* Email Button */}
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full"
-                  onClick={() => setShowEmailForm(true)}
-                >
-                  <Mail className="mr-2 h-5 w-5" />
-                  Войти по email
-                </Button>
-              </>
-            ) : (
-              <>
-                {/* Email Form */}
-                <form onSubmit={handleEmailLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="example@mail.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      autoComplete="email"
-                      autoFocus
-                    />
-                  </div>
+              <p className="text-xs text-center text-muted-foreground pt-2">
+                Продолжая, вы соглашаетесь с{" "}
+                <Link href="/terms" className="underline hover:text-primary">
+                  условиями использования
+                </Link>{" "}
+                и{" "}
+                <Link href="/privacy" className="underline hover:text-primary">
+                  политикой конфиденциальности
+                </Link>
+              </p>
+            </CardContent>
+          </Card>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Имя (необязательно)</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Как вас зовут?"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      autoComplete="name"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Входим...
-                      </>
-                    ) : (
-                      "Войти"
-                    )}
-                  </Button>
-                </form>
-
-                <Button
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => setShowEmailForm(false)}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Другие способы входа
-                </Button>
-              </>
-            )}
-
-            <p className="text-xs text-center text-muted-foreground">
-              Продолжая, вы соглашаетесь с условиями использования сервиса
-            </p>
-          </CardContent>
-        </Card>
+          {/* Benefits */}
+          <Card className="glass-card">
+            <CardContent className="pt-6">
+              <h3 className="font-semibold mb-3">После входа вам будет доступно:</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Бесплатные программы: Введение и Дыхательная гимнастика
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Отслеживание вашего прогресса
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Синхронизация с мобильным приложением
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {/* Footer */}

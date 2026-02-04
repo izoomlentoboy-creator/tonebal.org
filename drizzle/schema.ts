@@ -35,6 +35,9 @@ export const subscriptions = mysqlTable("subscriptions", {
   accessCode: varchar("accessCode", { length: 8 }).notNull().unique(),
   expiresAt: timestamp("expiresAt").notNull(),
   isActive: int("isActive").default(1).notNull(),
+  // One-time code reveal system
+  codeRevealed: int("codeRevealed").default(0).notNull(), // 0 = hidden, 1 = revealed and used
+  codeRevealedAt: timestamp("codeRevealedAt"), // When code was revealed (for 5-min cancel window)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -83,3 +86,32 @@ export const userProgress = mysqlTable(
 
 export type UserProgress = typeof userProgress.$inferSelect;
 export type InsertUserProgress = typeof userProgress.$inferInsert;
+
+/**
+ * Voice ratings table - stores daily voice feeling ratings (1-10)
+ */
+export const voiceRatings = mysqlTable("voice_ratings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  rating: int("rating").notNull(), // 1-10
+  note: text("note"), // Optional note about feelings
+  ratedAt: timestamp("ratedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type VoiceRating = typeof voiceRatings.$inferSelect;
+export type InsertVoiceRating = typeof voiceRatings.$inferInsert;
+
+/**
+ * User directions table - stores user's selected rehabilitation direction
+ */
+export const userDirections = mysqlTable("user_directions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  nosologyId: varchar("nosologyId", { length: 50 }).notNull(),
+  selectedAt: timestamp("selectedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserDirection = typeof userDirections.$inferSelect;
+export type InsertUserDirection = typeof userDirections.$inferInsert;

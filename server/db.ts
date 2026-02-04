@@ -1,14 +1,18 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertUser, 
-  users, 
-  subscriptions, 
+import {
+  InsertUser,
+  users,
+  subscriptions,
   InsertSubscription,
   payments,
   InsertPayment,
   userProgress,
-  InsertUserProgress
+  InsertUserProgress,
+  voiceRatings,
+  InsertVoiceRating,
+  userDirections,
+  InsertUserDirection
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -226,4 +230,201 @@ export async function getUserById(userId: number) {
     .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+// Voice Ratings
+export async function addVoiceRating(data: InsertVoiceRating) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(voiceRatings).values(data);
+}
+
+export async function getUserVoiceRatings(userId: number, limit = 30) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(voiceRatings)
+    .where(eq(voiceRatings.userId, userId))
+    .orderBy(desc(voiceRatings.ratedAt))
+    .limit(limit);
+}
+
+export async function getVoiceRatingsByDateRange(
+  userId: number,
+  startDate: Date,
+  endDate: Date
+) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(voiceRatings)
+    .where(
+      and(
+        eq(voiceRatings.userId, userId),
+        gte(voiceRatings.ratedAt, startDate),
+        lte(voiceRatings.ratedAt, endDate)
+      )
+    )
+    .orderBy(voiceRatings.ratedAt);
+}
+
+// User Directions
+export async function getUserDirection(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(userDirections)
+    .where(eq(userDirections.userId, userId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function setUserDirection(userId: number, nosologyId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .insert(userDirections)
+    .values({
+      userId,
+      nosologyId,
+    })
+    .onDuplicateKeyUpdate({
+      set: {
+        nosologyId,
+        updatedAt: new Date(),
+      },
+    });
+}
+
+// Subscription Code Reveal
+export async function revealAccessCode(subscriptionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(subscriptions)
+    .set({
+      codeRevealed: 1,
+      codeRevealedAt: new Date(),
+    })
+    .where(eq(subscriptions.id, subscriptionId));
+}
+
+export async function cancelCodeReveal(subscriptionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Only allow cancel within 5 minutes of reveal
+  const sub = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.id, subscriptionId))
+    .limit(1);
+
+  if (sub.length === 0) {
+    throw new Error("Subscription not found");
+  }
+
+  const subscription = sub[0];
+
+  if (!subscription.codeRevealedAt) {
+    throw new Error("Code was not revealed");
+  }
+
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  if (subscription.codeRevealedAt < fiveMinutesAgo) {
+    throw new Error("Cancel window expired (5 minutes)");
+  }
+
+  await db
+    .update(subscriptions)
+    .set({
+      codeRevealed: 0,
+      codeRevealedAt: null,
+    })
+    .where(eq(subscriptions.id, subscriptionId));
+}
+
+// Progress Calendar - Get unique days with completed lessons
+export async function getProgressCalendar(userId: number, year: number, month: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+
+  const progress = await db
+    .select()
+    .from(userProgress)
+    .where(
+      and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.completed, 1),
+        gte(userProgress.completedAt, startDate),
+        lte(userProgress.completedAt, endDate)
+      )
+    );
+
+  // Get unique dates
+  const uniqueDates = new Set<string>();
+  progress.forEach(p => {
+    if (p.completedAt) {
+      uniqueDates.add(p.completedAt.toISOString().split('T')[0]);
+    }
+  });
+
+  return Array.from(uniqueDates);
+}
+
+// Activity Stats - Lessons completed per day for last N days
+export async function getActivityStats(userId: number, days = 7) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  startDate.setHours(0, 0, 0, 0);
+
+  const progress = await db
+    .select()
+    .from(userProgress)
+    .where(
+      and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.completed, 1),
+        gte(userProgress.completedAt, startDate)
+      )
+    );
+
+  // Group by date
+  const stats: Record<string, number> = {};
+  progress.forEach(p => {
+    if (p.completedAt) {
+      const date = p.completedAt.toISOString().split('T')[0];
+      stats[date] = (stats[date] || 0) + 1;
+    }
+  });
+
+  // Fill in missing dates with 0
+  const result: Array<{ date: string; count: number }> = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    result.push({
+      date: dateStr,
+      count: stats[dateStr] || 0,
+    });
+  }
+
+  return result;
 }

@@ -6,9 +6,37 @@ import { ENV } from "./_core/env";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
-import { generateAccessCode, calculateExpiryDate, getDaysRemaining, validateAccessCode, normalizeAccessCode } from "./utils/accessCode";
+import {
+  generateAccessCode,
+  calculateExpiryDate,
+  getDaysRemaining,
+  validateAccessCode,
+  normalizeAccessCode,
+} from "./utils/accessCode";
 import { createPayment, getPaymentStatus } from "./services/yookassa";
 import nosologiesData from "../shared/nosologies.json";
+
+// Type for nosology data
+type NosologyData = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  lessonCount: number;
+  duration: string;
+  isFree: boolean;
+  lessons: Array<{
+    id: string;
+    title: string;
+    goal: string;
+    duration: number;
+    videoUrl: string | null;
+    steps: Array<{ number: number; text: string; duration?: number }>;
+    methodology: { icon: string; title: string; items: string[] };
+    errors: { icon: string; title: string; items: string[]; isWarning?: boolean };
+  }>;
+};
 
 export const appRouter = router({
   system: systemRouter,
@@ -62,32 +90,89 @@ export const appRouter = router({
   subscription: router({
     getMy: protectedProcedure.query(async ({ ctx }) => {
       const subscription = await db.getActiveSubscription(ctx.user.id);
-      
+
       if (!subscription) {
         return null;
       }
-      
+
+      // Calculate if cancel is still possible (within 5 minutes of reveal)
+      let canCancelReveal = false;
+      if (subscription.codeRevealed === 1 && subscription.codeRevealedAt) {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        canCancelReveal = subscription.codeRevealedAt > fiveMinutesAgo;
+      }
+
       return {
         ...subscription,
         daysRemaining: getDaysRemaining(subscription.expiresAt),
+        canCancelReveal,
+        // Mask code if not revealed
+        accessCode:
+          subscription.codeRevealed === 1 ? subscription.accessCode : "****-****",
+        accessCodeMasked: subscription.codeRevealed !== 1,
       };
     }),
-    
+
+    // Reveal the access code (one-time action)
+    revealCode: protectedProcedure.mutation(async ({ ctx }) => {
+      const subscription = await db.getActiveSubscription(ctx.user.id);
+
+      if (!subscription) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Подписка не найдена" });
+      }
+
+      if (subscription.codeRevealed === 1) {
+        // Already revealed, just return the code
+        return {
+          accessCode: subscription.accessCode,
+          alreadyRevealed: true,
+        };
+      }
+
+      // Reveal the code
+      await db.revealAccessCode(subscription.id);
+
+      return {
+        accessCode: subscription.accessCode,
+        alreadyRevealed: false,
+        canCancelUntil: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      };
+    }),
+
+    // Cancel code reveal (within 5 minutes)
+    cancelReveal: protectedProcedure.mutation(async ({ ctx }) => {
+      const subscription = await db.getActiveSubscription(ctx.user.id);
+
+      if (!subscription) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Подписка не найдена" });
+      }
+
+      try {
+        await db.cancelCodeReveal(subscription.id);
+        return { success: true };
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: error instanceof Error ? error.message : "Не удалось отменить",
+        });
+      }
+    }),
+
     checkAccess: protectedProcedure
       .input(z.object({ nosologyId: z.string() }))
       .query(async ({ ctx, input }) => {
         // Бесплатные разделы
-        if (input.nosologyId === 'introduction' || input.nosologyId === 'breathing') {
-          return { hasAccess: true, reason: 'free' };
+        if (input.nosologyId === "introduction" || input.nosologyId === "breathing") {
+          return { hasAccess: true, reason: "free" };
         }
-        
+
         // Проверяем подписку
         const subscription = await db.getActiveSubscription(ctx.user.id);
         if (subscription && new Date(subscription.expiresAt) > new Date()) {
-          return { hasAccess: true, reason: 'subscription' };
+          return { hasAccess: true, reason: "subscription" };
         }
-        
-        return { hasAccess: false, reason: 'no_subscription' };
+
+        return { hasAccess: false, reason: "no_subscription" };
       }),
   }),
 
@@ -96,14 +181,129 @@ export const appRouter = router({
     getMy: protectedProcedure.query(async ({ ctx }) => {
       return await db.getUserProgress(ctx.user.id);
     }),
-    
+
     markComplete: protectedProcedure
-      .input(z.object({
-        nosologyId: z.string(),
-        lessonId: z.string(),
-      }))
+      .input(
+        z.object({
+          nosologyId: z.string(),
+          lessonId: z.string(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         await db.markLessonComplete(ctx.user.id, input.nosologyId, input.lessonId);
+        return { success: true };
+      }),
+
+    // Get calendar with completed days for a month
+    getCalendar: protectedProcedure
+      .input(
+        z.object({
+          year: z.number(),
+          month: z.number().min(1).max(12),
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        const dates = await db.getProgressCalendar(ctx.user.id, input.year, input.month);
+        return { dates };
+      }),
+
+    // Get activity stats for last N days
+    getStats: protectedProcedure
+      .input(
+        z.object({
+          days: z.number().min(1).max(90).optional().default(7),
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        const stats = await db.getActivityStats(ctx.user.id, input.days);
+        // Calculate total lessons available
+        const totalLessons = Object.values(nosologiesData).reduce(
+          (sum, n) => sum + (n as NosologyData).lessonCount,
+          0
+        );
+        const completedLessons =
+          (await db.getUserProgress(ctx.user.id)).filter((p) => p.completed === 1).length || 0;
+
+        return {
+          dailyStats: stats,
+          totalLessons,
+          completedLessons,
+          completionPercent: Math.round((completedLessons / totalLessons) * 100),
+        };
+      }),
+  }),
+
+  // Voice Ratings
+  voiceRating: router({
+    add: protectedProcedure
+      .input(
+        z.object({
+          rating: z.number().min(1).max(10),
+          note: z.string().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.addVoiceRating({
+          userId: ctx.user.id,
+          rating: input.rating,
+          note: input.note,
+        });
+        return { success: true };
+      }),
+
+    getMy: protectedProcedure
+      .input(
+        z.object({
+          limit: z.number().min(1).max(100).optional().default(30),
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        return await db.getUserVoiceRatings(ctx.user.id, input.limit);
+      }),
+
+    getByDateRange: protectedProcedure
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        return await db.getVoiceRatingsByDateRange(
+          ctx.user.id,
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
+      }),
+  }),
+
+  // User Direction (selected rehabilitation program)
+  direction: router({
+    getMy: protectedProcedure.query(async ({ ctx }) => {
+      const direction = await db.getUserDirection(ctx.user.id);
+      if (!direction) return null;
+
+      const nosology = nosologiesData[direction.nosologyId as keyof typeof nosologiesData];
+      return {
+        ...direction,
+        nosology: nosology || null,
+      };
+    }),
+
+    setMy: protectedProcedure
+      .input(
+        z.object({
+          nosologyId: z.string(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        // Verify nosology exists and is not free (free ones don't need direction)
+        const nosology = nosologiesData[input.nosologyId as keyof typeof nosologiesData];
+        if (!nosology) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Направление не найдено" });
+        }
+
+        await db.setUserDirection(ctx.user.id, input.nosologyId);
         return { success: true };
       }),
   }),
