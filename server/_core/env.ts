@@ -17,4 +17,10 @@ export const ENV = {
   // Subscription settings - yearly
   subscriptionYearlyPrice: 18990, // рублей
   subscriptionYearlyDays: 365,
+  // OAuth credentials (server-side)
+  // Поддерживаем оба варианта: с VITE_ префиксом (для совместимости) и без
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? process.env.VITE_GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  vkAppId: process.env.VK_APP_ID ?? process.env.VITE_VK_APP_ID ?? "",
+  vkAppSecret: process.env.VK_APP_SECRET ?? "",
 };

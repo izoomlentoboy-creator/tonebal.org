@@ -1,7 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AppleSignInButton } from "@/components/AppleSignInButton";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { CheckCircle2, Smartphone, Volume2 } from "lucide-react";
@@ -55,7 +54,7 @@ export default function Home() {
             Голосовая реабилитация онлайн
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Профессиональные программы восстановления голоса, разработанные логопедами. 
+            Профессиональные программы восстановления голоса, разработанные логопедами.
             Занимайтесь в удобное время, отслеживайте прогресс, достигайте результатов.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -64,12 +63,9 @@ export default function Home() {
                 <Link href="/dashboard">Перейти к программам</Link>
               </Button>
             ) : (
-              <>
-                <AppleSignInButton size="lg" variant="default" />
-                <Button size="lg" variant="outline" asChild>
-                  <a href={getLoginUrl()}>Другие способы входа</a>
-                </Button>
-              </>
+              <Button size="lg" asChild>
+                <a href={getLoginUrl()}>Войти через VK</a>
+              </Button>
             )}
           </div>
           </div>
@@ -127,11 +123,11 @@ export default function Home() {
           <p className="text-center text-muted-foreground mb-12">
             2 программы доступны бесплатно после регистрации
           </p>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {nosologies?.map((nosology) => (
-              <Card 
-                key={nosology.id} 
+              <Card
+                key={nosology.id}
                 className="hover:shadow-lg transition-shadow"
                 style={{ borderTopColor: nosology.color, borderTopWidth: '3px' }}
               >
@@ -165,7 +161,7 @@ export default function Home() {
           <Smartphone className="h-16 w-16 mx-auto mb-6 text-primary" />
           <h2 className="text-3xl font-bold mb-4">Скачайте мобильное приложение</h2>
           <p className="text-lg text-muted-foreground mb-6">
-            Дневник голоса и запись голоса доступны только в мобильном приложении. 
+            Дневник голоса и запись голоса доступны только в мобильном приложении.
             Отслеживайте свой прогресс, записывайте упражнения и анализируйте результаты.
           </p>
           <Button size="lg" variant="outline">
@@ -182,12 +178,9 @@ export default function Home() {
             <p className="text-lg mb-8 opacity-90">
               Зарегистрируйтесь и получите бесплатный доступ к программам "Введение" и "Дыхательная гимнастика"
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <AppleSignInButton size="lg" variant="secondary" />
-              <Button size="lg" variant="outline" className="bg-transparent border-white/30 hover:bg-white/10" asChild>
-                <a href={getLoginUrl()}>Другие способы</a>
-              </Button>
-            </div>
+            <Button size="lg" variant="secondary" asChild>
+              <a href={getLoginUrl()}>Войти через VK</a>
+            </Button>
           </div>
         </section>
       )}

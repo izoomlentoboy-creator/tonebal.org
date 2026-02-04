@@ -83,3 +83,54 @@ export const userProgress = mysqlTable(
 
 export type UserProgress = typeof userProgress.$inferSelect;
 export type InsertUserProgress = typeof userProgress.$inferInsert;
+
+/**
+ * Daily activity table - tracks user practice sessions per day
+ */
+export const dailyActivity = mysqlTable(
+  "daily_activity",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
+    lessonsCompleted: int("lessonsCompleted").default(0).notNull(),
+    totalMinutes: int("totalMinutes").default(0).notNull(),
+    nosologiesWorked: text("nosologiesWorked"), // JSON array of nosology IDs
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    uniqueDaily: {
+      columns: [table.userId, table.date],
+      name: "unique_daily_activity"
+    }
+  })
+);
+
+export type DailyActivity = typeof dailyActivity.$inferSelect;
+export type InsertDailyActivity = typeof dailyActivity.$inferInsert;
+
+/**
+ * Daily progress table - tracks daily progress per nosology (resets each day)
+ */
+export const dailyProgress = mysqlTable(
+  "daily_progress",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    nosologyId: varchar("nosologyId", { length: 50 }).notNull(),
+    date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
+    lessonsCompleted: int("lessonsCompleted").default(0).notNull(),
+    totalLessons: int("totalLessons").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueDailyProgress: {
+      columns: [table.userId, table.nosologyId, table.date],
+      name: "unique_daily_progress"
+    }
+  })
+);
+
+export type DailyProgress = typeof dailyProgress.$inferSelect;
+export type InsertDailyProgress = typeof dailyProgress.$inferInsert;
