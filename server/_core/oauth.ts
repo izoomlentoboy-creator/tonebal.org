@@ -1,5 +1,5 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
-import type { Express, Request, Response } from "express";
+import type { Application, Request, Response } from "../types";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
@@ -11,7 +11,7 @@ import { ENV } from "./env";
  * Поддерживает: Apple Sign In, Google OAuth, VK OAuth, Email авторизация
  */
 
-export function registerOAuthRoutes(app: Express) {
+export function registerOAuthRoutes(app: Application) {
   // Простая авторизация по email
   app.post("/api/auth/email", async (req: Request, res: Response) => {
     try {

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import type { Request, Response } from "../types";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -39,7 +40,7 @@ async function startServer() {
   registerOAuthRoutes(app);
 
   // REST API endpoint for iOS code activation
-  app.post("/api/activate-code", async (req, res) => {
+  app.post("/api/activate-code", async (req: Request, res: Response) => {
     try {
       const { code, userId } = req.body;
 
