@@ -69,7 +69,7 @@ export function registerOAuthRoutes(app: Express) {
         scope: "", // Базовые права (имя, фото)
       });
 
-      const authUrl = `https://id.vk.com/authorize?${params.toString()}`;
+      const authUrl = `https://id.vk.ru/authorize?${params.toString()}`;
       res.redirect(authUrl);
     } catch (error) {
       console.error("[VK Auth] Start failed:", error);
@@ -143,7 +143,7 @@ export function registerOAuthRoutes(app: Express) {
 
       let tokenData: any;
       try {
-        const tokenUrl = `https://id.vk.com/oauth2/auth?${tokenQueryParams.toString()}`;
+        const tokenUrl = `https://id.vk.ru/oauth2/auth?${tokenQueryParams.toString()}`;
         const tokenResponse = await fetch(tokenUrl, {
           method: "POST",
           headers: {
@@ -177,7 +177,7 @@ export function registerOAuthRoutes(app: Express) {
           client_id: VK_APP_ID,
         });
 
-        const userInfoResponse = await fetch("https://id.vk.com/oauth2/user_info", {
+        const userInfoResponse = await fetch("https://id.vk.ru/oauth2/user_info", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
