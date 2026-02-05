@@ -2,13 +2,10 @@ interface VKSignInButtonProps {
   className?: string;
 }
 
-const VK_APP_ID = "54441764";
-const REDIRECT_URI = "https://tonebal.org/api/auth/vk/callback";
-
 export function VKSignInButton({ className }: VKSignInButtonProps) {
   const handleLogin = () => {
-    const authUrl = `https://oauth.vk.com/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=email&display=page`;
-    window.location.href = authUrl;
+    // Перенаправляем на серверный endpoint который генерирует PKCE и редиректит на VK
+    window.location.href = "/api/auth/vk/start";
   };
 
   return (

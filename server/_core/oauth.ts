@@ -4,11 +4,32 @@ import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
 import { ENV } from "./env";
+import * as crypto from "crypto";
+import { parse as parseCookieHeader } from "cookie";
+
+const VK_APP_ID = "54441764";
+const VK_PKCE_COOKIE = "vk_pkce";
 
 /**
  * Авторизация для ToneBalance
- * Поддерживает: VK OAuth
+ * Поддерживает: VK ID с PKCE
  */
+
+// Генерация code_verifier для PKCE
+function generateCodeVerifier(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+// Генерация code_challenge из code_verifier
+function generateCodeChallenge(verifier: string): string {
+  const hash = crypto.createHash("sha256").update(verifier).digest();
+  return hash.toString("base64url");
+}
+
+// Генерация state для защиты от CSRF
+function generateState(): string {
+  return crypto.randomBytes(16).toString("hex");
+}
 
 export function registerOAuthRoutes(app: Express) {
   // Проверка текущей сессии
@@ -21,64 +42,46 @@ export function registerOAuthRoutes(app: Express) {
     }
   });
 
-  // VK ID SDK token endpoint (новый способ авторизации через VK ID SDK)
-  app.post("/api/auth/vk/token", async (req: Request, res: Response) => {
+  // VK ID авторизация - начало (генерация PKCE и редирект на VK)
+  app.get("/api/auth/vk/start", (req: Request, res: Response) => {
     try {
-      const { access_token, user_id, email } = req.body;
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = generateCodeChallenge(codeVerifier);
+      const state = generateState();
 
-      if (!access_token || !user_id) {
-        res.status(400).json({ error: "Missing access_token or user_id" });
-        return;
-      }
-
-      // Получаем информацию о пользователе через VK API
-      const userUrl = new URL("https://api.vk.com/method/users.get");
-      userUrl.searchParams.set("user_ids", user_id.toString());
-      userUrl.searchParams.set("fields", "photo_200,first_name,last_name");
-      userUrl.searchParams.set("access_token", access_token);
-      userUrl.searchParams.set("v", "5.131");
-
-      const userResponse = await fetch(userUrl.toString());
-      const userData = await userResponse.json();
-
-      let userName = "";
-      if (userData.response && userData.response[0]) {
-        const vkUser = userData.response[0];
-        userName = `${vkUser.first_name || ""} ${vkUser.last_name || ""}`.trim();
-      }
-
-      const vkUserId = `vk_${user_id}`;
-
-      // Создаем или обновляем пользователя
-      await db.upsertUser({
-        openId: vkUserId,
-        name: userName || null,
-        email: email || null,
-        loginMethod: "vk",
-        lastSignedIn: new Date(),
+      // Сохраняем code_verifier и state в cookie (5 минут)
+      const pkceData = JSON.stringify({ codeVerifier, state });
+      res.cookie(VK_PKCE_COOKIE, pkceData, {
+        httpOnly: true,
+        secure: ENV.isProduction,
+        sameSite: "lax",
+        maxAge: 5 * 60 * 1000, // 5 минут
+        path: "/",
       });
 
-      // Создаем сессию
-      const sessionToken = await sdk.createSessionToken(vkUserId, {
-        name: userName,
-        expiresInMs: ONE_YEAR_MS,
+      // Формируем URL для VK ID
+      const params = new URLSearchParams({
+        client_id: VK_APP_ID,
+        redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
+        response_type: "code",
+        scope: "email",
+        state: state,
+        code_challenge: codeChallenge,
+        code_challenge_method: "s256",
       });
 
-      // Устанавливаем cookie
-      const cookieOptions = getSessionCookieOptions(req);
-      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-
-      res.json({ success: true });
+      const authUrl = `https://id.vk.com/authorize?${params.toString()}`;
+      res.redirect(authUrl);
     } catch (error) {
-      console.error("[VK Auth] Token endpoint failed", error);
-      res.status(500).json({ error: "Authentication failed" });
+      console.error("[VK Auth] Start failed:", error);
+      res.redirect("/login?error=start_failed");
     }
   });
 
-  // VK OAuth callback (для стандартного OAuth)
+  // VK ID callback (обработка ответа от VK)
   app.get("/api/auth/vk/callback", async (req: Request, res: Response) => {
     try {
-      const { code, device_id } = req.query;
+      const { code, state, device_id } = req.query;
 
       if (!code || typeof code !== "string") {
         console.error("[VK Auth] No code provided");
@@ -86,34 +89,80 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      const vkAppSecret = process.env.VK_APP_SECRET;
-      if (!vkAppSecret) {
-        console.error("[VK Auth] VK_APP_SECRET not configured");
-        res.redirect("/login?error=config_error");
+      // Получаем PKCE данные из cookie
+      const cookies = req.headers.cookie ? parseCookieHeader(req.headers.cookie) : {};
+      const pkceDataStr = cookies[VK_PKCE_COOKIE];
+      let codeVerifier: string | null = null;
+      let savedState: string | null = null;
+
+      if (pkceDataStr) {
+        try {
+          const pkceData = JSON.parse(pkceDataStr);
+          codeVerifier = pkceData.codeVerifier;
+          savedState = pkceData.state;
+        } catch {
+          console.warn("[VK Auth] Failed to parse PKCE cookie");
+        }
+      }
+
+      // Очищаем PKCE cookie
+      res.clearCookie(VK_PKCE_COOKIE, { path: "/" });
+
+      // Проверяем state если есть
+      if (savedState && state && state !== savedState) {
+        console.error("[VK Auth] State mismatch");
+        res.redirect("/login?error=state_mismatch");
         return;
       }
 
-      // Обмениваем code на access token через стандартный VK OAuth
-      const tokenUrl = new URL("https://oauth.vk.com/access_token");
-      tokenUrl.searchParams.set("client_id", "54441764");
-      tokenUrl.searchParams.set("client_secret", vkAppSecret);
-      tokenUrl.searchParams.set("redirect_uri", `${ENV.baseUrl}/api/auth/vk/callback`);
-      tokenUrl.searchParams.set("code", code);
-      if (device_id && typeof device_id === "string") {
-        tokenUrl.searchParams.set("device_id", device_id);
+      // Пробуем VK ID token exchange с PKCE
+      let tokenData: any = null;
+
+      if (codeVerifier) {
+        try {
+          const tokenResponse = await fetch("https://id.vk.com/oauth2/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              grant_type: "authorization_code",
+              code: code,
+              client_id: VK_APP_ID,
+              redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
+              code_verifier: codeVerifier,
+              device_id: (device_id as string) || "",
+            }),
+          });
+          tokenData = await tokenResponse.json();
+          console.log("[VK Auth] VK ID token response:", JSON.stringify(tokenData));
+        } catch (fetchError) {
+          console.error("[VK Auth] VK ID token fetch failed:", fetchError);
+        }
       }
 
-      let tokenData: any;
-      try {
-        const tokenResponse = await fetch(tokenUrl.toString());
-        tokenData = await tokenResponse.json();
-      } catch (fetchError) {
-        console.error("[VK Auth] Failed to fetch token:", fetchError);
-        res.redirect("/login?error=network_error");
-        return;
+      // Если VK ID не сработал, пробуем старый OAuth
+      if (!tokenData || tokenData.error || !tokenData.access_token) {
+        const vkAppSecret = process.env.VK_APP_SECRET;
+        if (vkAppSecret) {
+          try {
+            const tokenUrl = new URL("https://oauth.vk.com/access_token");
+            tokenUrl.searchParams.set("client_id", VK_APP_ID);
+            tokenUrl.searchParams.set("client_secret", vkAppSecret);
+            tokenUrl.searchParams.set("redirect_uri", `${ENV.baseUrl}/api/auth/vk/callback`);
+            tokenUrl.searchParams.set("code", code);
+            if (device_id && typeof device_id === "string") {
+              tokenUrl.searchParams.set("device_id", device_id);
+            }
+
+            const tokenResponse = await fetch(tokenUrl.toString());
+            tokenData = await tokenResponse.json();
+            console.log("[VK Auth] Legacy OAuth response:", JSON.stringify(tokenData));
+          } catch (fetchError) {
+            console.error("[VK Auth] Legacy OAuth fetch failed:", fetchError);
+          }
+        }
       }
 
-      if (tokenData.error || !tokenData.access_token) {
+      if (!tokenData || tokenData.error || !tokenData.access_token) {
         console.error("[VK Auth] Token exchange failed:", tokenData);
         res.redirect("/login?error=token_failed");
         return;
@@ -141,7 +190,6 @@ export function registerOAuthRoutes(app: Express) {
         }
       } catch (userFetchError) {
         console.warn("[VK Auth] Failed to fetch user info:", userFetchError);
-        // Continue without user name
       }
 
       const vkUserId = `vk_${userId}`;
