@@ -58,15 +58,16 @@ export function registerOAuthRoutes(app: Express) {
         path: "/",
       });
 
-      // Формируем URL для VK ID OAuth 2.1
+      // Формируем URL для VK ID OAuth 2.1 (параметры как в Web SDK)
       const params = new URLSearchParams({
+        app_id: VK_APP_ID,
         client_id: VK_APP_ID,
         redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
         response_type: "code",
         state: state,
         code_challenge: codeChallenge,
         code_challenge_method: "s256",
-        scope: "", // Базовые права (имя, фото)
+        sdk_type: "vkid",
       });
 
       const authUrl = `https://id.vk.ru/authorize?${params.toString()}`;
@@ -80,9 +81,10 @@ export function registerOAuthRoutes(app: Express) {
   // VK ID callback (обработка OAuth 2.1 authorization code)
   app.get("/api/auth/vk/callback", async (req: Request, res: Response) => {
     try {
-      const { code, state, error, error_description } = req.query;
+      // VK возвращает: code, state, device_id, type, error
+      const { code, state, device_id, type, error, error_description } = req.query;
 
-      console.log("[VK Auth] Callback received:", { code: !!code, state, error });
+      console.log("[VK Auth] Callback received:", { code: !!code, state, device_id, type, error });
 
       // Проверяем ошибки от VK
       if (error) {
@@ -129,9 +131,11 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      // Используем device_id от VK или генерируем свой
+      const deviceId = (typeof device_id === "string" && device_id) ? device_id : crypto.randomUUID();
+
       // Обмениваем authorization code на access_token через VK ID OAuth 2.1
       // Все параметры идут в form body (как в Android SDK)
-      const deviceId = crypto.randomUUID();
       const tokenFormBody = new URLSearchParams({
         grant_type: "authorization_code",
         code: code,
