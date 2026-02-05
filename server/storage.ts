@@ -1,7 +1,7 @@
 // Storage helpers for file uploads
 // Uses storage proxy (Authorization: Bearer <token>)
 
-import { ENV } from './_core/env';
+import { ENV } from './_core/env.js';
 
 type StorageConfig = { baseUrl: string; apiKey: string };
 
