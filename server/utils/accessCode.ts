@@ -145,11 +145,16 @@ export function formatAccessCode(code: string): string {
 
 /**
  * Вычисление даты истечения подписки
+ * @param daysToAdd - количество дней для добавления
+ * @param baseDate - базовая дата (если не указана, используется текущая дата)
  */
-export function calculateExpiryDate(daysFromNow: number = 30): Date {
-  const date = new Date();
-  date.setDate(date.getDate() + daysFromNow);
-  return date;
+export function calculateExpiryDate(daysToAdd: number = 30, baseDate?: Date): Date {
+  // Если есть базовая дата и она в будущем - добавляем дни к ней
+  // Иначе добавляем к текущей дате
+  const now = new Date();
+  const base = baseDate && new Date(baseDate) > now ? new Date(baseDate) : now;
+  base.setDate(base.getDate() + daysToAdd);
+  return base;
 }
 
 /**
