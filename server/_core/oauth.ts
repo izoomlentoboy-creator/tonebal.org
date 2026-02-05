@@ -130,23 +130,26 @@ export function registerOAuthRoutes(app: Express) {
       }
 
       // Обмениваем authorization code на access_token через VK ID OAuth 2.1
-      const tokenParams = new URLSearchParams({
+      // Параметры идут в query string, code - в body (как в официальном SDK)
+      const deviceId = crypto.randomUUID();
+      const tokenQueryParams = new URLSearchParams({
         grant_type: "authorization_code",
-        code: code,
-        code_verifier: codeVerifier,
-        client_id: VK_APP_ID,
         redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
-        device_id: crypto.randomUUID(), // Уникальный ID устройства
+        client_id: VK_APP_ID,
+        code_verifier: codeVerifier,
+        device_id: deviceId,
+        state: savedState,
       });
 
       let tokenData: any;
       try {
-        const tokenResponse = await fetch("https://id.vk.com/oauth2/auth", {
+        const tokenUrl = `https://id.vk.com/oauth2/auth?${tokenQueryParams.toString()}`;
+        const tokenResponse = await fetch(tokenUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: tokenParams.toString(),
+          body: new URLSearchParams({ code }).toString(),
         });
         tokenData = await tokenResponse.json();
         console.log("[VK Auth] Token exchange response:", JSON.stringify(tokenData));
