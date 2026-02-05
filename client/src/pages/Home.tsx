@@ -335,7 +335,7 @@ export default function Home() {
                     <LogIn size={16} className="mr-2" /> Войти
                   </Link>
                 </Button>
-                <VKSignInButton size="sm" />
+                <VKSignInButton />
               </>
             )}
           </div>
@@ -423,7 +423,7 @@ export default function Home() {
                     </Button>
                   ) : (
                     <>
-                      <VKSignInButton size="lg" />
+                      <VKSignInButton />
                       <Button size="lg" variant="outline" asChild>
                         <Link href="/login">
                           <Globe className="mr-2 h-5 w-5" /> Подробнее
@@ -627,7 +627,7 @@ export default function Home() {
                 <Link href="/dashboard">Все программы <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
             ) : (
-              <VKSignInButton size="lg" />
+              <VKSignInButton />
             )}
           </div>
         </div>
@@ -695,7 +695,7 @@ export default function Home() {
 
           {!isAuthenticated && (
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-12">
-              <VKSignInButton size="lg" />
+              <VKSignInButton />
             </div>
           )}
 

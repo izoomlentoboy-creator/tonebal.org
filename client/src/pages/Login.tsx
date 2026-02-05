@@ -50,11 +50,7 @@ export default function Login() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* VK Sign In */}
-              <VKSignInButton
-                className="w-full"
-                size="lg"
-                variant="default"
-              />
+              <VKSignInButton className="w-full flex justify-center" />
 
               {/* Security info */}
               <div className="space-y-3 pt-4 border-t">
