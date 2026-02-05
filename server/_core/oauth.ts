@@ -130,26 +130,26 @@ export function registerOAuthRoutes(app: Express) {
       }
 
       // Обмениваем authorization code на access_token через VK ID OAuth 2.1
-      // Параметры идут в query string, code - в body (как в официальном SDK)
+      // Все параметры идут в form body (как в Android SDK)
       const deviceId = crypto.randomUUID();
-      const tokenQueryParams = new URLSearchParams({
+      const tokenFormBody = new URLSearchParams({
         grant_type: "authorization_code",
-        redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
-        client_id: VK_APP_ID,
+        code: code,
         code_verifier: codeVerifier,
+        client_id: VK_APP_ID,
         device_id: deviceId,
+        redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
         state: savedState,
       });
 
       let tokenData: any;
       try {
-        const tokenUrl = `https://id.vk.ru/oauth2/auth?${tokenQueryParams.toString()}`;
-        const tokenResponse = await fetch(tokenUrl, {
+        const tokenResponse = await fetch("https://id.vk.ru/oauth2/auth", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: new URLSearchParams({ code }).toString(),
+          body: tokenFormBody.toString(),
         });
         tokenData = await tokenResponse.json();
         console.log("[VK Auth] Token exchange response:", JSON.stringify(tokenData));
@@ -170,19 +170,20 @@ export function registerOAuthRoutes(app: Express) {
       const userEmail = tokenData.email || null;
 
       // Получаем информацию о пользователе через VK ID user_info endpoint
+      // access_token и device_id в body, client_id в query (как в Android SDK)
       let userName = "";
       try {
-        const userInfoParams = new URLSearchParams({
+        const userInfoBody = new URLSearchParams({
           access_token: accessToken,
-          client_id: VK_APP_ID,
+          device_id: deviceId,
         });
 
-        const userInfoResponse = await fetch("https://id.vk.ru/oauth2/user_info", {
+        const userInfoResponse = await fetch(`https://id.vk.ru/oauth2/user_info?client_id=${VK_APP_ID}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: userInfoParams.toString(),
+          body: userInfoBody.toString(),
         });
         const userInfoData = await userInfoResponse.json();
         console.log("[VK Auth] User info response:", JSON.stringify(userInfoData));
