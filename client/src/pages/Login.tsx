@@ -1,29 +1,9 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { VKSignInButton } from "@/components/VKSignInButton";
-import { Shield, CheckCircle2, ArrowLeft, Volume2 } from "lucide-react";
+import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
+import { Shield, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
-
-// Logo Icon component (same as Home.tsx)
-function LogoIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <defs>
-        <linearGradient id="logoGradientLogin" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#8B5CF6" />
-          <stop offset="100%" stopColor="#A78BFA" />
-        </linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="45" fill="url(#logoGradientLogin)" opacity="0.1" />
-      <circle cx="50" cy="50" r="30" fill="url(#logoGradientLogin)" opacity="0.2" />
-      <circle cx="50" cy="50" r="15" fill="url(#logoGradientLogin)" />
-      <path d="M50 20 Q65 35 65 50 Q65 65 50 80" stroke="url(#logoGradientLogin)" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M50 20 Q35 35 35 50 Q35 65 50 80" stroke="url(#logoGradientLogin)" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M50 10 Q75 30 75 50 Q75 70 50 90" stroke="url(#logoGradientLogin)" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.6" />
-      <path d="M50 10 Q25 30 25 50 Q25 70 50 90" stroke="url(#logoGradientLogin)" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.6" />
-    </svg>
-  );
-}
 
 export default function Login() {
   const { isAuthenticated, loading } = useAuth();
@@ -70,7 +50,7 @@ export default function Login() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <ArrowLeft className="h-5 w-5 text-slate-600" />
-              <LogoIcon className="w-10 h-10" />
+              <ToneBalanceLogo size={40} />
               <span className="font-bold text-xl text-slate-800">Tone Balance</span>
             </Link>
           </div>
@@ -93,9 +73,9 @@ export default function Login() {
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="w-20 h-20 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center"
+                className="w-20 h-20 bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl flex items-center justify-center p-2"
               >
-                <Volume2 className="h-10 w-10 text-violet-600" />
+                <ToneBalanceLogo size={60} />
               </motion.div>
             </div>
 
