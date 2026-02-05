@@ -1,6 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -168,9 +167,8 @@ export default function Profile() {
               Назад к программам
             </Link>
           </Button>
-          <Link href="/" className="flex items-center gap-2">
-            <ToneBalanceLogo className="w-8 h-8" size={32} />
-            <span className="font-bold text-lg tracking-tight text-slate-900 hidden sm:block">Tone Balance</span>
+          <Link href="/" className="flex items-center">
+            <span className="font-bold text-lg tracking-tight text-slate-900">Tone Balance</span>
           </Link>
         </div>
       </nav>

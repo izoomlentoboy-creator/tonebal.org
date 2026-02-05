@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
 import { Timer } from "@/components/Timer";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock, Play, Pause, Volume2, VolumeX, Maximize, Target, AlertTriangle, BookOpen, Timer as TimerIcon } from "lucide-react";
@@ -129,8 +128,8 @@ export default function LessonPage() {
                 Завершено
               </span>
             )}
-            <Link href="/" className="flex items-center gap-2">
-              <ToneBalanceLogo className="w-8 h-8" size={32} />
+            <Link href="/" className="flex items-center">
+              <span className="font-bold text-lg tracking-tight text-slate-900">Tone Balance</span>
             </Link>
           </div>
         </div>

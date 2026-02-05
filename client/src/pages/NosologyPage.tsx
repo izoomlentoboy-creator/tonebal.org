@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, CheckCircle2, Circle, Clock, Lock, BookOpen, Play } from "lucide-react";
 import { Link, useParams, useLocation } from "wouter";
@@ -59,9 +58,8 @@ export default function NosologyPage() {
                 Назад
               </Link>
             </Button>
-            <Link href="/" className="flex items-center gap-2">
-              <ToneBalanceLogo className="w-8 h-8" size={32} />
-              <span className="font-bold text-lg tracking-tight text-slate-900 hidden sm:block">Tone Balance</span>
+            <Link href="/" className="flex items-center">
+              <span className="font-bold text-lg tracking-tight text-slate-900">Tone Balance</span>
             </Link>
           </div>
         </nav>

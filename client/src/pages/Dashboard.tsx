@@ -1,7 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
 import { trpc } from "@/lib/trpc";
 import {
   Lock,
@@ -400,10 +399,7 @@ export default function Dashboard() {
       {/* Header */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-purple-100/50">
         <div className="container mx-auto px-4 md:px-6 h-16 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2.5 cursor-pointer group">
-            <div className="bg-white rounded-xl shadow-sm p-1 border border-purple-50 group-hover:shadow-md transition-shadow">
-              <ToneBalanceLogo className="w-7 h-7" size={28} />
-            </div>
+          <Link href="/" className="flex items-center cursor-pointer group">
             <span className="font-bold text-lg tracking-tight text-slate-900">Tone Balance</span>
           </Link>
 
