@@ -1,6 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,16 +18,23 @@ import {
   Copy,
   Check,
   Eye,
-  EyeOff,
   Smartphone,
   AlertTriangle,
   Clock,
   Undo2,
   ShieldCheck,
+  User,
+  Mail,
+  LogOut,
+  Trash2,
+  Download,
+  Calendar,
+  CreditCard,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -62,7 +69,7 @@ export default function Profile() {
       utils.subscription.getMy.invalidate();
       if (!data.alreadyRevealed) {
         toast.success("Код раскрыт! Введите его в приложении в течение 5 минут.");
-        setCancelTimeLeft(5 * 60); // 5 minutes in seconds
+        setCancelTimeLeft(5 * 60);
       }
       setShowRevealDialog(false);
     },
@@ -82,7 +89,6 @@ export default function Profile() {
     },
   });
 
-  // Timer for cancel window
   useEffect(() => {
     if (subscription?.canCancelReveal && subscription?.codeRevealedAt) {
       const revealTime = new Date(subscription.codeRevealedAt).getTime();
@@ -95,7 +101,6 @@ export default function Profile() {
     }
   }, [subscription]);
 
-  // Countdown timer
   useEffect(() => {
     if (cancelTimeLeft === null || cancelTimeLeft <= 0) return;
 
@@ -147,139 +152,176 @@ export default function Profile() {
   const canCancel = subscription?.canCancelReveal && cancelTimeLeft && cancelTimeLeft > 0;
 
   return (
-    <div className="min-h-screen bg-purple-gradient-light">
+    <div className="min-h-screen bg-[#FDFBFF] font-sans">
+      {/* Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-100/30 rounded-full blur-[120px] translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50/40 rounded-full blur-[100px] -translate-x-1/3 translate-y-1/3" />
+      </div>
+
       {/* Header */}
-      <header className="border-b glass sticky top-0 z-50">
-        <div className="container flex h-16 items-center">
-          <Button variant="ghost" asChild>
+      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-purple-100/50">
+        <div className="container mx-auto px-4 md:px-6 h-16 flex justify-between items-center">
+          <Button variant="ghost" asChild className="gap-2 text-slate-600 hover:text-[#7C3AED]">
             <Link href="/dashboard">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4" />
               Назад к программам
             </Link>
           </Button>
+          <Link href="/" className="flex items-center gap-2">
+            <ToneBalanceLogo className="w-8 h-8" size={32} />
+            <span className="font-bold text-lg tracking-tight text-slate-900 hidden sm:block">Tone Balance</span>
+          </Link>
         </div>
-      </header>
+      </nav>
 
-      <div className="container max-w-2xl py-8">
-        <h1 className="text-3xl font-bold mb-8">Личный кабинет</h1>
+      <div className="container mx-auto px-4 md:px-6 max-w-2xl pt-24 pb-12 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-8 tracking-tight">Личный кабинет</h1>
 
-        <div className="space-y-6">
-          {/* User Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Информация о пользователе</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Имя</p>
-                <p className="font-medium">{user?.name || "Не указано"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{user?.email || "Не указан"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Метод входа</p>
-                <p className="font-medium">VK</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Subscription & Access Code */}
-          {hasSubscription && subscription ? (
-            <Card className="border-primary/50 overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-primary to-purple-400" />
-              <CardHeader>
-                <div className="flex items-center justify-between">
+          <div className="space-y-6">
+            {/* User Info Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"
+            >
+              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <User className="h-5 w-5 text-[#7C3AED]" />
+                Информация о пользователе
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                  <div className="w-10 h-10 rounded-xl bg-[#7C3AED]/10 flex items-center justify-center">
+                    <User className="h-5 w-5 text-[#7C3AED]" />
+                  </div>
                   <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <ShieldCheck className="h-5 w-5 text-green-600" />
-                      Подписка активна
-                    </CardTitle>
-                    <CardDescription>
-                      Полный доступ ко всем программам
-                    </CardDescription>
+                    <p className="text-xs text-slate-500">Имя</p>
+                    <p className="font-medium text-slate-900">{user?.name || "Не указано"}</p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Access Code Section */}
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <Smartphone className="h-5 w-5" />
-                      <span className="font-medium">Код доступа для iOS</span>
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Email</p>
+                    <p className="font-medium text-slate-900">{user?.email || "Не указан"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.408 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.862-.523-2.049-1.712-1.033-1.01-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.597v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.118-5.335-3.202C4.624 10.857 4 8.658 4 8.2c0-.254.102-.491.597-.491h1.744c.447 0 .615.203.787.678.864 2.49 2.303 4.675 2.896 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.204.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.17.508.271.508.22 0 .407-.136.813-.542 1.253-1.406 2.149-3.574 2.149-3.574.118-.254.322-.491.77-.491h1.744c.524 0 .643.27.524.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.049.17.49-.085.744-.576.744z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Метод входа</p>
+                    <p className="font-medium text-slate-900">VK</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Subscription & Access Code */}
+            {hasSubscription && subscription ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100"
+              >
+                <div className="h-1.5 bg-gradient-to-r from-[#7C3AED] to-[#A855F7]" />
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+                        <ShieldCheck className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-slate-900">Подписка активна</h2>
+                        <p className="text-sm text-slate-500">Полный доступ ко всем программам</p>
+                      </div>
                     </div>
-                    {!isCodeMasked && (
-                      <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
-                        Раскрыт
-                      </span>
-                    )}
                   </div>
 
-                  {/* Code Display */}
-                  <div className="bg-white/10 backdrop-blur rounded-xl p-4 mb-4">
-                    <div className="text-center">
-                      <p className="text-4xl font-mono font-bold tracking-[0.3em] mb-1">
-                        {isCodeMasked ? "****-****" : subscription.accessCode}
-                      </p>
-                      <p className="text-xs text-white/60">
-                        {isCodeMasked ? "Нажмите кнопку ниже, чтобы раскрыть код" : "Введите этот код в приложении"}
-                      </p>
+                  {/* Access Code Section */}
+                  <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Smartphone className="h-5 w-5" />
+                        <span className="font-medium">Код доступа для iOS</span>
+                      </div>
+                      {!isCodeMasked && (
+                        <span className="text-xs bg-green-500/20 text-green-400 px-2.5 py-1 rounded-full font-medium">
+                          Раскрыт
+                        </span>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  {isCodeMasked ? (
-                    // Code is hidden - show reveal button
-                    <AlertDialog open={showRevealDialog} onOpenChange={setShowRevealDialog}>
-                      <AlertDialogTrigger asChild>
-                        <Button className="w-full" variant="secondary">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Раскрыть код
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                            Раскрыть код доступа?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription className="space-y-3">
-                            <p>
-                              Код доступа предназначен для активации подписки в мобильном приложении.
-                            </p>
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-yellow-800 text-sm">
-                              <p className="font-medium mb-1">Важно:</p>
-                              <ul className="list-disc list-inside space-y-1">
-                                <li>Код можно раскрыть только один раз</li>
-                                <li>У вас будет 5 минут, чтобы отменить раскрытие</li>
-                                <li>После подтверждения в приложении код исчезнет</li>
-                              </ul>
-                            </div>
-                            <p className="text-sm">
-                              Подтвердите, что вы готовы ввести код в приложение прямо сейчас.
-                            </p>
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Отмена</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleRevealCode}
-                            disabled={revealCodeMutation.isPending}
-                          >
-                            {revealCodeMutation.isPending ? "Раскрываем..." : "Раскрыть код"}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  ) : (
-                    // Code is revealed
-                    <div className="space-y-3">
-                      <div className="flex gap-2">
+                    <div className="bg-white/10 backdrop-blur rounded-xl p-4 mb-4">
+                      <div className="text-center">
+                        <p className="text-4xl font-mono font-bold tracking-[0.3em] mb-1">
+                          {isCodeMasked ? "****-****" : subscription.accessCode}
+                        </p>
+                        <p className="text-xs text-white/60">
+                          {isCodeMasked ? "Нажмите кнопку ниже, чтобы раскрыть код" : "Введите этот код в приложении"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isCodeMasked ? (
+                      <AlertDialog open={showRevealDialog} onOpenChange={setShowRevealDialog}>
+                        <AlertDialogTrigger asChild>
+                          <Button className="w-full bg-white text-slate-900 hover:bg-white/90">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Раскрыть код
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="rounded-2xl">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2">
+                              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                              Раскрыть код доступа?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="space-y-3">
+                              <p>
+                                Код доступа предназначен для активации подписки в мобильном приложении.
+                              </p>
+                              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-yellow-800 text-sm">
+                                <p className="font-medium mb-1">Важно:</p>
+                                <ul className="list-disc list-inside space-y-1">
+                                  <li>Код можно раскрыть только один раз</li>
+                                  <li>У вас будет 5 минут, чтобы отменить раскрытие</li>
+                                  <li>После подтверждения в приложении код исчезнет</li>
+                                </ul>
+                              </div>
+                              <p className="text-sm">
+                                Подтвердите, что вы готовы ввести код в приложение прямо сейчас.
+                              </p>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="rounded-xl">Отмена</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleRevealCode}
+                              disabled={revealCodeMutation.isPending}
+                              className="rounded-xl"
+                            >
+                              {revealCodeMutation.isPending ? "Раскрываем..." : "Раскрыть код"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : (
+                      <div className="space-y-3">
                         <Button
-                          className="flex-1"
-                          variant="secondary"
+                          className="w-full bg-white text-slate-900 hover:bg-white/90"
                           onClick={handleCopyCode}
                         >
                           {codeCopied ? (
@@ -294,161 +336,172 @@ export default function Profile() {
                             </>
                           )}
                         </Button>
-                      </div>
 
-                      {/* Cancel window */}
-                      {canCancel && (
-                        <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-yellow-200">
-                              <Clock className="h-4 w-4" />
-                              <span className="text-sm">
-                                Можно отменить: {formatTime(cancelTimeLeft)}
-                              </span>
+                        {canCancel && (
+                          <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-yellow-200">
+                                <Clock className="h-4 w-4" />
+                                <span className="text-sm">
+                                  Можно отменить: {formatTime(cancelTimeLeft)}
+                                </span>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-yellow-200 hover:text-yellow-100 hover:bg-yellow-500/20"
+                                onClick={handleCancelReveal}
+                                disabled={cancelRevealMutation.isPending}
+                              >
+                                <Undo2 className="h-4 w-4 mr-1" />
+                                Отменить
+                              </Button>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-yellow-200 hover:text-yellow-100 hover:bg-yellow-500/20"
-                              onClick={handleCancelReveal}
-                              disabled={cancelRevealMutation.isPending}
-                            >
-                              <Undo2 className="h-4 w-4 mr-1" />
-                              Отменить
-                            </Button>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {!canCancel && !isCodeMasked && (
-                        <p className="text-xs text-white/50 text-center">
-                          Введите код в приложении, чтобы получить доступ к подписке
-                        </p>
-                      )}
+                        {!canCancel && !isCodeMasked && (
+                          <p className="text-xs text-white/50 text-center">
+                            Введите код в приложении, чтобы получить доступ к подписке
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Subscription Stats */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-slate-50 p-4 rounded-2xl text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <Calendar className="h-4 w-4 text-[#7C3AED]" />
+                      </div>
+                      <p className="text-3xl font-bold text-slate-900">{subscription.daysRemaining}</p>
+                      <p className="text-xs text-slate-500">дней осталось</p>
                     </div>
-                  )}
-                </div>
-
-                {/* Subscription Info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-muted p-4 rounded-xl">
-                    <p className="text-sm text-muted-foreground mb-1">Осталось дней</p>
-                    <p className="text-3xl font-bold">{subscription.daysRemaining}</p>
+                    <div className="bg-slate-50 p-4 rounded-2xl text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <CreditCard className="h-4 w-4 text-[#7C3AED]" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-900">
+                        {new Date(subscription.expiresAt).toLocaleDateString("ru-RU", {
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </p>
+                      <p className="text-xs text-slate-500">дата истечения</p>
+                    </div>
                   </div>
-                  <div className="bg-muted p-4 rounded-xl">
-                    <p className="text-sm text-muted-foreground mb-1">Истекает</p>
-                    <p className="text-sm font-medium">
-                      {new Date(subscription.expiresAt).toLocaleDateString("ru-RU", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
 
-                <Button className="w-full" asChild>
-                  <Link href="/payment">Продлить подписку</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Подписка не активна</CardTitle>
-                <CardDescription>
+                  <Button className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] rounded-xl" asChild>
+                    <Link href="/payment">Продлить подписку</Link>
+                  </Button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="bg-gradient-to-br from-[#7C3AED] to-[#9333EA] rounded-2xl p-6 text-white"
+              >
+                <h2 className="text-xl font-bold mb-2">Подписка не активна</h2>
+                <p className="text-white/80 mb-4">
                   Оформите подписку, чтобы получить доступ ко всем программам и код для iOS приложения
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild>
+                </p>
+                <Button className="w-full bg-white text-[#7C3AED] hover:bg-white/90 rounded-xl" asChild>
                   <Link href="/payment">Оформить подписку</Link>
                 </Button>
-              </CardContent>
-            </Card>
-          )}
+              </motion.div>
+            )}
 
-          {/* App Info */}
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-            <CardHeader>
-              <Smartphone className="h-8 w-8 text-primary mb-2" />
-              <CardTitle className="text-lg">Мобильное приложение</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+            {/* App Info */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Smartphone className="h-6 w-6" />
+                </div>
+                <h2 className="text-lg font-bold">Мобильное приложение</h2>
+              </div>
+              <p className="text-sm text-slate-300 mb-4">
                 В приложении доступны дополнительные функции:
               </p>
-              <ul className="text-sm space-y-2">
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  Полноценный дневник голоса с историей
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  Трекер гидратации с напоминаниями
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  Скачивание видео для офлайн-просмотра
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  Запись голоса и анализ прогресса
-                </li>
+              <ul className="text-sm space-y-2 mb-6">
+                {[
+                  "Полноценный дневник голоса с историей",
+                  "Трекер гидратации с напоминаниями",
+                  "Скачивание видео для офлайн-просмотра",
+                  "Запись голоса и анализ прогресса",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400 shrink-0" />
+                    <span className="text-slate-300">{item}</span>
+                  </li>
+                ))}
               </ul>
-              <Button variant="outline" className="w-full">
+              <Button variant="secondary" className="w-full rounded-xl">
+                <Download className="h-4 w-4 mr-2" />
                 Скачать из App Store
               </Button>
-            </CardContent>
-          </Card>
+            </motion.div>
 
-          {/* Account Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Управление аккаунтом</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleLogout}
-                disabled={logoutMutation.isPending}
-              >
-                Выйти из аккаунта
-              </Button>
+            {/* Account Actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"
+            >
+              <h2 className="text-lg font-bold text-slate-900 mb-4">Управление аккаунтом</h2>
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start rounded-xl border-slate-200"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                >
+                  <LogOut className="h-4 w-4 mr-2 text-slate-500" />
+                  Выйти из аккаунта
+                </Button>
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    className="w-full"
-                    disabled={deleteAccountMutation.isPending}
-                  >
-                    Удалить аккаунт
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Это действие нельзя отменить. Все ваши данные, включая прогресс и подписку, будут
-                      безвозвратно удалены.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Отмена</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteAccount}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      disabled={deleteAccountMutation.isPending}
                     >
-                      Удалить навсегда
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardContent>
-          </Card>
-        </div>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Удалить аккаунт
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Это действие нельзя отменить. Все ваши данные, включая прогресс и подписку, будут
+                        безвозвратно удалены.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-xl">Отмена</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className="bg-red-600 hover:bg-red-700 rounded-xl"
+                      >
+                        Удалить навсегда
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
