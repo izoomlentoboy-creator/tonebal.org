@@ -405,9 +405,14 @@ export const appRouter = router({
             const plan = isYearly ? "yearly" : "monthly";
             const days = isYearly ? ENV.subscriptionYearlyDays : ENV.subscriptionDays;
 
+            // Проверяем существующую активную подписку для продления
+            const existingSubscription = await db.getActiveSubscription(dbPayment.userId);
+            const baseDate = existingSubscription?.expiresAt;
+
             // Создаём подписку с криптостойким кодом (разные ключи для разных планов)
             const accessCode = generateAccessCode(plan);
-            const expiresAt = calculateExpiryDate(days);
+            // Если есть активная подписка - добавляем дни к ней, иначе от текущей даты
+            const expiresAt = calculateExpiryDate(days, baseDate);
 
             await db.createSubscription({
               userId: dbPayment.userId,
@@ -417,7 +422,8 @@ export const appRouter = router({
               isActive: 1,
             });
 
-            console.log(`[Payment] Subscription activated for user ${dbPayment.userId}, code: ${accessCode}, days: ${days}`);
+            const isRenewal = !!existingSubscription;
+            console.log(`[Payment] Subscription ${isRenewal ? 'renewed' : 'activated'} for user ${dbPayment.userId}, code: ${accessCode}, days: ${days}${isRenewal ? ' (added to existing)' : ''}`);
 
             return {
               status: "succeeded",
@@ -483,9 +489,14 @@ export const appRouter = router({
             const isYearly = dbPayment.nosology === "all_yearly";
             const plan = isYearly ? "yearly" : "monthly";
             const days = isYearly ? ENV.subscriptionYearlyDays : ENV.subscriptionDays;
-            
+
+            // Проверяем существующую активную подписку для продления
+            const existingSubscription = await db.getActiveSubscription(dbPayment.userId);
+            const baseDate = existingSubscription?.expiresAt;
+
             const accessCode = generateAccessCode(plan);
-            const expiresAt = calculateExpiryDate(days);
+            // Если есть активная подписка - добавляем дни к ней, иначе от текущей даты
+            const expiresAt = calculateExpiryDate(days, baseDate);
 
             await db.createSubscription({
               userId: dbPayment.userId,
@@ -495,7 +506,8 @@ export const appRouter = router({
               isActive: 1,
             });
 
-            console.log(`[Webhook] Subscription activated for user ${dbPayment.userId}`);
+            const isRenewal = !!existingSubscription;
+            console.log(`[Webhook] Subscription ${isRenewal ? 'renewed' : 'activated'} for user ${dbPayment.userId}${isRenewal ? ' (days added to existing)' : ''}`);
           }
         }
 

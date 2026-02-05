@@ -34,8 +34,12 @@ export default function NosologyPage() {
     );
   }
 
-  const hasSubscription = subscription && subscription.isActive === 1;
+  // Проверяем активность подписки: isActive и daysRemaining > 0
+  const hasSubscription = subscription && subscription.isActive === 1 && subscription.daysRemaining > 0;
   const hasAccess = nosology.isFree || hasSubscription;
+
+  // Проверяем, истекла ли подписка (была активная, но дней не осталось)
+  const subscriptionExpired = subscription && subscription.isActive === 1 && subscription.daysRemaining <= 0;
 
   if (!hasAccess) {
     return (
@@ -71,13 +75,27 @@ export default function NosologyPage() {
             <div className="w-20 h-20 mx-auto mb-6 bg-slate-100 rounded-2xl flex items-center justify-center">
               <Lock className="h-10 w-10 text-slate-400" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">Требуется подписка</h1>
-            <p className="text-lg text-slate-500 mb-8">
-              Эта программа доступна только с premium подпиской
-            </p>
-            <Button size="lg" className="rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9]" asChild>
-              <Link href="/payment">Оформить подписку</Link>
-            </Button>
+            {subscriptionExpired ? (
+              <>
+                <h1 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">Подписка истекла</h1>
+                <p className="text-lg text-slate-500 mb-8">
+                  Ваша подписка закончилась. Продлите её, чтобы продолжить обучение
+                </p>
+                <Button size="lg" className="rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9]" asChild>
+                  <Link href="/payment">Продлить подписку</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">Требуется подписка</h1>
+                <p className="text-lg text-slate-500 mb-8">
+                  Эта программа доступна только с premium подпиской
+                </p>
+                <Button size="lg" className="rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9]" asChild>
+                  <Link href="/payment">Оформить подписку</Link>
+                </Button>
+              </>
+            )}
           </motion.div>
         </div>
       </div>

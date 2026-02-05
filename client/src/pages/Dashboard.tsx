@@ -379,7 +379,12 @@ export default function Dashboard() {
     );
   }
 
-  const hasSubscription = subscription && subscription.isActive === 1;
+  // Проверяем активность подписки: isActive и daysRemaining > 0
+  const hasSubscription = subscription && subscription.isActive === 1 && subscription.daysRemaining > 0;
+  // Проверяем, истекла ли подписка (была активная, но дней не осталось)
+  const subscriptionExpired = subscription && subscription.isActive === 1 && subscription.daysRemaining <= 0;
+  // Подписка скоро истечёт (менее 7 дней)
+  const subscriptionExpiringSoon = subscription && subscription.isActive === 1 && subscription.daysRemaining > 0 && subscription.daysRemaining <= 7;
   const completedLessons = progress?.filter((p) => p.completed === 1).length || 0;
   const totalLessons = nosologies?.reduce((sum, n) => sum + n.lessonCount, 0) || 0;
   const currentDirectionNosology = direction?.nosology || null;
@@ -435,8 +440,57 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Subscription Alert */}
-            {!hasSubscription && (
+            {/* Subscription Expired Alert */}
+            {subscriptionExpired && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Lock className="h-5 w-5" />
+                    <h2 className="text-lg font-bold">Подписка истекла</h2>
+                  </div>
+                  <p className="text-white/90 text-sm mb-4">
+                    Ваша подписка закончилась. Продлите её, чтобы продолжить обучение по premium программам
+                  </p>
+                  <Button className="bg-white text-red-600 hover:bg-white/90 rounded-xl" asChild>
+                    <Link href="/payment">Продлить подписку</Link>
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Subscription Expiring Soon Alert */}
+            {subscriptionExpiringSoon && subscription && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-6 text-white relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="h-5 w-5" />
+                    <h2 className="text-lg font-bold">Подписка скоро истечёт</h2>
+                  </div>
+                  <p className="text-white/90 text-sm mb-4">
+                    Осталось {subscription.daysRemaining} {subscription.daysRemaining === 1 ? 'день' : subscription.daysRemaining <= 4 ? 'дня' : 'дней'}.
+                    Продлите сейчас, чтобы не потерять доступ
+                  </p>
+                  <Button className="bg-white text-amber-600 hover:bg-white/90 rounded-xl" asChild>
+                    <Link href="/payment">Продлить подписку</Link>
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Subscription Alert (no subscription) */}
+            {!hasSubscription && !subscriptionExpired && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
