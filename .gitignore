@@ -9,7 +9,6 @@ coverage/
 # Production
 dist/
 build/
-api/index.js
 
 # Environment
 .env
@@ -36,3 +35,4 @@ Thumbs.db
 
 # Vercel
 .vercel
+.vercel/output

@@ -1,15 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm build && pnpm build:api",
-  "outputDirectory": "dist/public",
-  "framework": null,
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30
-    }
-  },
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index.js" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "buildCommand": "pnpm build:vercel",
+  "outputDirectory": ".vercel/output",
+  "framework": null
 }
