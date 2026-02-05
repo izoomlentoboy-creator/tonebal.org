@@ -1,5 +1,6 @@
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
 import {
   InsertUser,
   users,
@@ -22,7 +23,8 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const sql = neon(process.env.DATABASE_URL);
+      _db = drizzle(sql);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -43,47 +45,35 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
 
   try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
+    // Check if user exists
+    const existing = await db.select().from(users).where(eq(users.openId, user.openId)).limit(1);
 
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
+    if (existing.length > 0) {
+      // Update existing user
+      const updateSet: Record<string, unknown> = {};
 
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
+      if (user.name !== undefined) updateSet.name = user.name;
+      if (user.email !== undefined) updateSet.email = user.email;
+      if (user.loginMethod !== undefined) updateSet.loginMethod = user.loginMethod;
+      if (user.lastSignedIn !== undefined) updateSet.lastSignedIn = user.lastSignedIn;
+      if (user.role !== undefined) updateSet.role = user.role;
 
-    textFields.forEach(assignNullable);
+      updateSet.updatedAt = new Date();
 
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
+      await db.update(users).set(updateSet).where(eq(users.openId, user.openId));
+    } else {
+      // Insert new user
+      const values: InsertUser = {
+        openId: user.openId,
+        name: user.name ?? null,
+        email: user.email ?? null,
+        loginMethod: user.loginMethod ?? null,
+        lastSignedIn: user.lastSignedIn ?? new Date(),
+        role: user.role ?? (user.openId === ENV.ownerOpenId ? 'admin' : 'user'),
+      };
+
+      await db.insert(users).values(values);
     }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
@@ -117,13 +107,13 @@ export async function getActiveSubscription(userId: number) {
     .limit(1);
 
   if (result.length === 0) return undefined;
-  
+
   const sub = result[0];
   // Check if still active
   if (sub && sub.isActive === 1 && new Date(sub.expiresAt) > new Date()) {
     return sub;
   }
-  
+
   return undefined;
 }
 
@@ -201,22 +191,33 @@ export async function markLessonComplete(
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  // Try to insert, on duplicate key update
-  await db
-    .insert(userProgress)
-    .values({
+  // Check if exists
+  const existing = await db
+    .select()
+    .from(userProgress)
+    .where(
+      and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.nosologyId, nosologyId),
+        eq(userProgress.lessonId, lessonId)
+      )
+    )
+    .limit(1);
+
+  if (existing.length > 0) {
+    await db
+      .update(userProgress)
+      .set({ completed: 1, completedAt: new Date() })
+      .where(eq(userProgress.id, existing[0].id));
+  } else {
+    await db.insert(userProgress).values({
       userId,
       nosologyId,
       lessonId,
       completed: 1,
       completedAt: new Date(),
-    })
-    .onDuplicateKeyUpdate({
-      set: {
-        completed: 1,
-        completedAt: new Date(),
-      },
     });
+  }
 }
 
 export async function getUserById(userId: number) {
@@ -291,18 +292,20 @@ export async function setUserDirection(userId: number, nosologyId: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  await db
-    .insert(userDirections)
-    .values({
-      userId,
-      nosologyId,
-    })
-    .onDuplicateKeyUpdate({
-      set: {
-        nosologyId,
-        updatedAt: new Date(),
-      },
-    });
+  const existing = await db
+    .select()
+    .from(userDirections)
+    .where(eq(userDirections.userId, userId))
+    .limit(1);
+
+  if (existing.length > 0) {
+    await db
+      .update(userDirections)
+      .set({ nosologyId, updatedAt: new Date() })
+      .where(eq(userDirections.userId, userId));
+  } else {
+    await db.insert(userDirections).values({ userId, nosologyId });
+  }
 }
 
 // Subscription Code Reveal
