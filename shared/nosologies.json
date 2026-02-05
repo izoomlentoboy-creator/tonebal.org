@@ -15,7 +15,7 @@
         "title": "Добро пожаловать в ToneBalance",
         "goal": "Познакомиться с принципами работы приложения и правилами безопасности",
         "duration": 3,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/welcome_intro.mov",
         "steps": [
           {
             "number": 1,
@@ -154,7 +154,7 @@
         "title": "Техника безопасности",
         "goal": "Изучить правила безопасного выполнения упражнений",
         "duration": 3,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/safety_guidelines.mov",
         "steps": [
           {
             "number": 1,
@@ -314,10 +314,10 @@
       },
       {
         "id": "breathing_2",
-        "title": "Диафрагмальное дыхание сидя",
-        "goal": "Закрепить навык диафрагмального дыхания в положении сидя",
+        "title": "Диафрагмальное дыхание (базовое)",
+        "goal": "Освоить базовое диафрагмальное дыхание — фундамент голосообразования",
         "duration": 5,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/breathing_1_2.mov",
         "steps": [
           {
             "number": 1,
@@ -369,10 +369,10 @@
       },
       {
         "id": "breathing_3",
-        "title": "Дыхание с сопротивлением",
-        "goal": "Укрепить дыхательную мускулатуру через создание сопротивления",
+        "title": "Комплекс дыхательных упражнений (8 вариантов)",
+        "goal": "Освоить комплекс из 8 вариантов дыхательных упражнений",
         "duration": 7,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/breathing_1_3.mov",
         "steps": [
           {
             "number": 1,
@@ -424,10 +424,10 @@
       },
       {
         "id": "breathing_4",
-        "title": "Дыхание на счёт",
-        "goal": "Развить контроль над длительностью вдоха и выдоха",
+        "title": "Счёт на выдохе",
+        "goal": "Развить контроль над длительностью выдоха через счёт",
         "duration": 6,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/exhale_counting.mov",
         "steps": [
           {
             "number": 1,
@@ -479,10 +479,10 @@
       },
       {
         "id": "breathing_5",
-        "title": "Дыхание с движением рук",
-        "goal": "Координировать дыхание с движениями для улучшения контроля",
+        "title": "Дыхание с разведением рук",
+        "goal": "Координировать дыхание с разведением рук для улучшения контроля",
         "duration": 8,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/breathing_arm_spread.mov",
         "steps": [
           {
             "number": 1,
@@ -534,10 +534,10 @@
       },
       {
         "id": "breathing_6",
-        "title": "Дыхание стоя с наклонами",
-        "goal": "Усилить работу диафрагмы через изменение положения тела",
+        "title": "Наклоны туловища с дыханием",
+        "goal": "Усилить работу диафрагмы через наклоны туловища",
         "duration": 7,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/torso_tilt_breathing.mov",
         "steps": [
           {
             "number": 1,
@@ -589,10 +589,10 @@
       },
       {
         "id": "breathing_7",
-        "title": "Ритмическое дыхание",
-        "goal": "Выработать устойчивый ритм дыхания",
+        "title": "Рёберно-брюшное дыхание с аутотренингом",
+        "goal": "Освоить рёберно-брюшное дыхание в сочетании с аутотренингом",
         "duration": 8,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/rib_belly_breathing_autogenic.mov",
         "steps": [
           {
             "number": 1,
@@ -639,10 +639,10 @@
       },
       {
         "id": "breathing_8",
-        "title": "Дыхание с вибрацией губ",
-        "goal": "Подготовить артикуляционный аппарат к фонации",
+        "title": "Упражнение «Свеча»",
+        "goal": "Освоить упражнение «Свеча» для контроля выдоха",
         "duration": 6,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/candle_exercise.mov",
         "steps": [
           {
             "number": 1,
@@ -689,10 +689,10 @@
       },
       {
         "id": "breathing_9",
-        "title": "Дыхание 'Квадрат'",
-        "goal": "Развить максимальный контроль над дыханием",
+        "title": "Произнесение звуков [ш] и [с] на выдохе",
+        "goal": "Освоить произнесение звуков [ш] и [с] на длительном выдохе",
         "duration": 10,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/breathing_1_6.mov",
         "steps": [
           {
             "number": 1,
@@ -744,10 +744,10 @@
       },
       {
         "id": "breathing_10",
-        "title": "Дыхание с озвучиванием",
-        "goal": "Соединить дыхание с голосом",
+        "title": "Дыхание «Велосипед»",
+        "goal": "Освоить дыхательное упражнение «Велосипед»",
         "duration": 8,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/breathing_bicycle.mov",
         "steps": [
           {
             "number": 1,
@@ -1735,10 +1735,10 @@
     "lessons": [
       {
         "id": "paresis_1",
-        "title": "Этап 1, Урок 1: Подготовка 1",
-        "goal": "Выполнить упражнение этапа 1",
+        "title": "Отклонение головы назад с сопротивлением",
+        "goal": "Укрепить мышцы гортани через отклонение головы с сопротивлением",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/head_tilt_back_resistance.mov",
         "steps": [
           {
             "number": 1,
@@ -1780,10 +1780,10 @@
       },
       {
         "id": "paresis_2",
-        "title": "Этап 1, Урок 2: Подготовка 2",
-        "goal": "Выполнить упражнение этапа 1",
+        "title": "Наклоны головы вперёд с сопротивлением",
+        "goal": "Укрепить мышцы гортани через наклоны головы вперёд с сопротивлением",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/head_tilt_forward_resistance.mov",
         "steps": [
           {
             "number": 1,
@@ -1825,10 +1825,10 @@
       },
       {
         "id": "paresis_3",
-        "title": "Этап 1, Урок 3: Подготовка 3",
-        "goal": "Выполнить упражнение этапа 1",
+        "title": "Наклоны головы в стороны с сопротивлением",
+        "goal": "Укрепить мышцы гортани через наклоны головы в стороны с сопротивлением",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/head_tilt_side_resistance.mov",
         "steps": [
           {
             "number": 1,
@@ -1870,10 +1870,10 @@
       },
       {
         "id": "paresis_4",
-        "title": "Этап 1, Урок 4: Подготовка 4",
-        "goal": "Выполнить упражнение этапа 1",
+        "title": "Движения нижней челюстью",
+        "goal": "Развить подвижность нижней челюсти для улучшения артикуляции",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/jaw_movement.mov",
         "steps": [
           {
             "number": 1,
@@ -1915,10 +1915,10 @@
       },
       {
         "id": "paresis_5",
-        "title": "Этап 1, Урок 5: Подготовка 5",
-        "goal": "Выполнить упражнение этапа 1",
+        "title": "Надувание щёк",
+        "goal": "Укрепить мышцы щёк и улучшить контроль над дыханием",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/cheek_puffing.mov",
         "steps": [
           {
             "number": 1,
@@ -1960,10 +1960,10 @@
       },
       {
         "id": "paresis_6",
-        "title": "Этап 1, Урок 6: Подготовка 6",
-        "goal": "Выполнить упражнение этапа 1",
+        "title": "Доставание кончиком языка мягкого нёба",
+        "goal": "Развить подвижность языка для улучшения артикуляции",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/tongue_soft_palate.mov",
         "steps": [
           {
             "number": 1,
@@ -2005,10 +2005,10 @@
       },
       {
         "id": "paresis_7",
-        "title": "Этап 2, Урок 1: Активация 1",
-        "goal": "Выполнить упражнение этапа 2",
+        "title": "Произнесение фонемы [м] (мычание)",
+        "goal": "Освоить мычание для активации голосовых складок",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/phoneme_m_humming.MOV",
         "steps": [
           {
             "number": 1,
@@ -2050,10 +2050,10 @@
       },
       {
         "id": "paresis_8",
-        "title": "Этап 2, Урок 2: Активация 2",
-        "goal": "Выполнить упражнение этапа 2",
+        "title": "Сочетания [м] + гласные",
+        "goal": "Освоить сочетания звука [м] с гласными звуками",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/m_vowel_combinations.MOV",
         "steps": [
           {
             "number": 1,
@@ -2095,10 +2095,10 @@
       },
       {
         "id": "paresis_9",
-        "title": "Этап 2, Урок 3: Активация 3",
-        "goal": "Выполнить упражнение этапа 2",
+        "title": "Звонкие согласные с гласными",
+        "goal": "Освоить произнесение звонких согласных в сочетании с гласными",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/voiced_consonants_vowels.MOV",
         "steps": [
           {
             "number": 1,
@@ -2140,10 +2140,10 @@
       },
       {
         "id": "paresis_10",
-        "title": "Этап 2, Урок 4: Активация 4",
-        "goal": "Выполнить упражнение этапа 2",
+        "title": "Пары слогов на одном выдохе",
+        "goal": "Освоить произнесение пар слогов на одном выдохе",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/syllable_pairs_breath.MOV",
         "steps": [
           {
             "number": 1,
@@ -2185,10 +2185,10 @@
       },
       {
         "id": "paresis_11",
-        "title": "Этап 2, Урок 5: Активация 5",
-        "goal": "Выполнить упражнение этапа 2",
+        "title": "Длительное произнесение гласных и их сочетаний",
+        "goal": "Освоить длительное произнесение гласных звуков",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/sustained_vowels.mov",
         "steps": [
           {
             "number": 1,
@@ -2230,10 +2230,10 @@
       },
       {
         "id": "paresis_12",
-        "title": "Этап 2, Урок 6: Активация 6",
-        "goal": "Выполнить упражнение этапа 2",
+        "title": "Семь слогов с перемещающимися ударениями",
+        "goal": "Освоить произнесение семи слогов с перемещающимися ударениями",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/seven_syllables_stress.MOV",
         "steps": [
           {
             "number": 1,
@@ -2275,10 +2275,10 @@
       },
       {
         "id": "paresis_13",
-        "title": "Этап 3, Урок 1: Координация 1",
-        "goal": "Выполнить упражнение этапа 3",
+        "title": "Тренировка сочетаний гласных с [й]",
+        "goal": "Освоить сочетания гласных звуков с [й]",
         "duration": 15,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/vowel_j_combinations.mov",
         "steps": [
           {
             "number": 1,
@@ -2828,10 +2828,10 @@
     "lessons": [
       {
         "id": "dysphagia_1",
-        "title": "Урок 1: Оральная фаза 1",
-        "goal": "Улучшить оральная фаза 1",
+        "title": "Манёвр Мендельсона",
+        "goal": "Освоить манёвр Мендельсона для улучшения глотания",
         "duration": 10,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/mendelsohn_maneuver.mov",
         "steps": [
           {
             "number": 1,
@@ -2873,10 +2873,10 @@
       },
       {
         "id": "dysphagia_2",
-        "title": "Урок 2: Оральная фаза 2",
-        "goal": "Улучшить оральная фаза 2",
+        "title": "Упражнения для языка",
+        "goal": "Укрепить мышцы языка для улучшения глотания",
         "duration": 10,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/tongue_exercises.mov",
         "steps": [
           {
             "number": 1,
@@ -5445,10 +5445,10 @@
     "lessons": [
       {
         "id": "hypertonic_1",
-        "title": "Урок 1: Расслабление 1",
-        "goal": "Освоение техники расслабление 1",
+        "title": "Lip trills (вибрация губ)",
+        "goal": "Освоение техники Lip trills для расслабления голосовых складок",
         "duration": 11,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/lip_trills.mov",
         "steps": [
           {
             "number": 1,
@@ -5490,10 +5490,10 @@
       },
       {
         "id": "hypertonic_2",
-        "title": "Урок 2: Расслабление 2",
-        "goal": "Освоение техники расслабление 2",
+        "title": "Мычание с закрытым ртом (Humming)",
+        "goal": "Освоение техники Humming для расслабления голосовых складок",
         "duration": 11,
-        "videoUrl": null,
+        "videoUrl": "https://pub-0ef3b074918f4a12800a6e8ee7840db2.r2.dev/humming_closed_mouth.mov",
         "steps": [
           {
             "number": 1,
