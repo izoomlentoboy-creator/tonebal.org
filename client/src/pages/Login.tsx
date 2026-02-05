@@ -1,7 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { VKSignInButton } from "@/components/VKSignInButton";
-import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
-import { Shield, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Shield, CheckCircle2, ArrowLeft, Mic } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 
@@ -37,11 +36,6 @@ export default function Login() {
           animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fuchsia-200/10 rounded-full blur-3xl"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-        />
       </div>
 
       {/* Header */}
@@ -50,7 +44,6 @@ export default function Login() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <ArrowLeft className="h-5 w-5 text-slate-600" />
-              <ToneBalanceLogo size={40} />
               <span className="font-bold text-xl text-slate-800">Tone Balance</span>
             </Link>
           </div>
@@ -67,18 +60,6 @@ export default function Login() {
             transition={{ duration: 0.5 }}
             className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-violet-500/10 border border-white/50 p-8"
           >
-            {/* Logo */}
-            <div className="flex justify-center mb-6">
-              <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="w-20 h-20 bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl flex items-center justify-center p-2"
-              >
-                <ToneBalanceLogo size={60} />
-              </motion.div>
-            </div>
-
             {/* Title */}
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-slate-800 mb-2">Вход в ToneBalance</h1>

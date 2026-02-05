@@ -2,7 +2,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VKSignInButton } from "@/components/VKSignInButton";
-import { ToneBalanceLogo, ToneBalanceIcon } from "@/components/ToneBalanceLogo";
 import { trpc } from "@/lib/trpc";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
@@ -26,13 +25,16 @@ import {
   Bell,
   Clock,
   Download,
+  Volume2,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
-// Используем новый логотип
-const LogoIcon = ({ className = "w-10 h-10" }: { className?: string }) => (
-  <ToneBalanceLogo className={className} size={40} />
+// Простой логотип - иконка звука
+const LogoIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
+  <div className={`${className} bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center`}>
+    <Volume2 className="w-5 h-5 text-white" />
+  </div>
 );
 
 // --- Web Dashboard Mockup ---
