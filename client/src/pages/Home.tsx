@@ -2,6 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VKSignInButton } from "@/components/VKSignInButton";
+import { ToneBalanceLogo, ToneBalanceIcon } from "@/components/ToneBalanceLogo";
 import { trpc } from "@/lib/trpc";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
@@ -29,33 +30,9 @@ import {
 import { useState } from "react";
 import { Link } from "wouter";
 
-// --- Logo SVG ---
+// Используем новый логотип
 const LogoIcon = ({ className = "w-10 h-10" }: { className?: string }) => (
-  <svg viewBox="0 0 120 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="logoGradient" x1="10" y1="0" x2="110" y2="120" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stopColor="#C084FC" />
-        <stop offset="50%" stopColor="#A855F7" />
-        <stop offset="100%" stopColor="#7C3AED" />
-      </linearGradient>
-      <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#7C3AED" floodOpacity="0.3" />
-      </filter>
-    </defs>
-    <g filter="url(#dropShadow)">
-      <path d="M30 35 C30 25, 45 20, 60 20 C75 20, 90 25, 90 35 C90 42, 80 45, 60 48 C40 45, 30 42, 30 35 Z" fill="url(#logoGradient)" />
-      <path d="M35 50 C35 50, 40 75, 60 85 C80 75, 85 50, 85 50 C85 50, 75 55, 60 60 C45 55, 35 50, 35 50 Z" fill="url(#logoGradient)" />
-      <path d="M48 55 C48 55, 50 70, 60 75 C70 70, 72 55, 72 55" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.9" />
-      <rect x="42" y="90" width="36" height="8" rx="4" fill="url(#logoGradient)" />
-      <rect x="45" y="102" width="30" height="8" rx="4" fill="url(#logoGradient)" />
-      <path d="M20 50 C15 55, 15 65, 20 70" stroke="#A855F7" strokeWidth="4" strokeLinecap="round" />
-      <path d="M12 45 C5 55, 5 75, 12 85" stroke="#A855F7" strokeWidth="4" strokeLinecap="round" opacity="0.6" />
-      <path d="M100 50 V70" stroke="#A855F7" strokeWidth="4" strokeLinecap="round" />
-      <circle cx="94" cy="60" r="2" fill="#A855F7" />
-      <path d="M108 55 V65" stroke="#A855F7" strokeWidth="4" strokeLinecap="round" />
-      <path d="M115 58 V62" stroke="#A855F7" strokeWidth="4" strokeLinecap="round" opacity="0.7" />
-    </g>
-  </svg>
+  <ToneBalanceLogo className={className} size={40} />
 );
 
 // --- Web Dashboard Mockup ---

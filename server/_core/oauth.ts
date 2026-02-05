@@ -75,43 +75,44 @@ export function registerOAuthRoutes(app: Express) {
     }
   });
 
-  // VK OAuth callback (legacy, для обратной совместимости)
+  // VK OAuth callback (для стандартного OAuth и fallback кнопки)
   app.get("/api/auth/vk/callback", async (req: Request, res: Response) => {
     try {
-      const { code } = req.query;
+      const { code, device_id } = req.query;
 
       if (!code || typeof code !== "string") {
         res.redirect("/login?error=no_code");
         return;
       }
 
-      // Обмениваем code на access token через VK ID
-      const tokenResponse = await fetch("https://id.vk.com/oauth2/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          code,
-          client_id: "54441764",
-          client_secret: process.env.VK_APP_SECRET || "",
-          redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
-          code_verifier: "",
-        }).toString(),
-      });
+      // Обмениваем code на access token через стандартный VK OAuth
+      const tokenUrl = new URL("https://oauth.vk.com/access_token");
+      tokenUrl.searchParams.set("client_id", "54441764");
+      tokenUrl.searchParams.set("client_secret", process.env.VK_APP_SECRET || "");
+      tokenUrl.searchParams.set("redirect_uri", `${ENV.baseUrl}/api/auth/vk/callback`);
+      tokenUrl.searchParams.set("code", code);
+      if (device_id && typeof device_id === "string") {
+        tokenUrl.searchParams.set("device_id", device_id);
+      }
 
+      const tokenResponse = await fetch(tokenUrl.toString());
       const tokenData = await tokenResponse.json();
 
-      if (!tokenData.access_token || !tokenData.user_id) {
+      if (tokenData.error || !tokenData.access_token) {
         console.error("[VK Auth] Token exchange failed:", tokenData);
         res.redirect("/login?error=token_failed");
         return;
       }
 
+      const userId = tokenData.user_id;
+      const accessToken = tokenData.access_token;
+      const userEmail = tokenData.email || null;
+
       // Получаем информацию о пользователе
       const userUrl = new URL("https://api.vk.com/method/users.get");
-      userUrl.searchParams.set("user_ids", tokenData.user_id.toString());
+      userUrl.searchParams.set("user_ids", userId.toString());
       userUrl.searchParams.set("fields", "photo_200,first_name,last_name");
-      userUrl.searchParams.set("access_token", tokenData.access_token);
+      userUrl.searchParams.set("access_token", accessToken);
       userUrl.searchParams.set("v", "5.131");
 
       const userResponse = await fetch(userUrl.toString());
@@ -123,8 +124,7 @@ export function registerOAuthRoutes(app: Express) {
         userName = `${vkUser.first_name || ""} ${vkUser.last_name || ""}`.trim();
       }
 
-      const vkUserId = `vk_${tokenData.user_id}`;
-      const userEmail = tokenData.email || null;
+      const vkUserId = `vk_${userId}`;
 
       // Создаем или обновляем пользователя
       await db.upsertUser({
