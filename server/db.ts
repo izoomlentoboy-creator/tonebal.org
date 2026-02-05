@@ -103,7 +103,7 @@ export async function getActiveSubscription(userId: number) {
     .where(
       eq(subscriptions.userId, userId)
     )
-    .orderBy(subscriptions.expiresAt)
+    .orderBy(desc(subscriptions.expiresAt))
     .limit(1);
 
   if (result.length === 0) return undefined;
