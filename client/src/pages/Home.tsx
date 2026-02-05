@@ -306,14 +306,11 @@ export default function Home() {
                 <Link href="/dashboard">Мои программы</Link>
               </Button>
             ) : (
-              <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login">
-                    <LogIn size={16} className="mr-2" /> Войти
-                  </Link>
-                </Button>
-                <VKSignInButton />
-              </>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/login">
+                  <LogIn size={16} className="mr-2" /> Войти
+                </Link>
+              </Button>
             )}
           </div>
 
