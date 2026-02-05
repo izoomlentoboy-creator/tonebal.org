@@ -1,4 +1,4 @@
-import { ENV } from "../_core/env";
+import { ENV } from "../_core/env.js";
 
 const YOOKASSA_API_URL = "https://api.yookassa.ru/v3";
 const API_TIMEOUT = 25000; // 25 seconds

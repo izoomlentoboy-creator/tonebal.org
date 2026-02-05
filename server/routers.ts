@@ -1,20 +1,20 @@
-import { COOKIE_NAME } from "../shared/const";
+import { COOKIE_NAME } from "../shared/const.js";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { ENV } from "./_core/env";
-import { systemRouter } from "./_core/systemRouter";
-import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import * as db from "./db";
+import { getSessionCookieOptions } from "./_core/cookies.js";
+import { ENV } from "./_core/env.js";
+import { systemRouter } from "./_core/systemRouter.js";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc.js";
+import * as db from "./db.js";
 import {
   generateAccessCode,
   calculateExpiryDate,
   getDaysRemaining,
   validateAccessCode,
   normalizeAccessCode,
-} from "./utils/accessCode";
-import { createPayment, getPaymentStatus } from "./services/yookassa";
-import nosologiesData from "../shared/nosologies.json";
+} from "./utils/accessCode.js";
+import { createPayment, getPaymentStatus } from "./services/yookassa.js";
+import nosologiesData from "../shared/nosologies.json" with { type: "json" };
 
 // Type for nosology data
 type NosologyData = {
