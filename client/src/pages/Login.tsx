@@ -1,8 +1,29 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { VKSignInButton } from "@/components/VKSignInButton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Volume2, ArrowLeft, Shield, CheckCircle2 } from "lucide-react";
+import { Shield, CheckCircle2, ArrowLeft, Volume2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { motion } from "framer-motion";
+
+// Logo Icon component (same as Home.tsx)
+function LogoIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <linearGradient id="logoGradientLogin" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#8B5CF6" />
+          <stop offset="100%" stopColor="#A78BFA" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="45" fill="url(#logoGradientLogin)" opacity="0.1" />
+      <circle cx="50" cy="50" r="30" fill="url(#logoGradientLogin)" opacity="0.2" />
+      <circle cx="50" cy="50" r="15" fill="url(#logoGradientLogin)" />
+      <path d="M50 20 Q65 35 65 50 Q65 65 50 80" stroke="url(#logoGradientLogin)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M50 20 Q35 35 35 50 Q35 65 50 80" stroke="url(#logoGradientLogin)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M50 10 Q75 30 75 50 Q75 70 50 90" stroke="url(#logoGradientLogin)" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.6" />
+      <path d="M50 10 Q25 30 25 50 Q25 70 50 90" stroke="url(#logoGradientLogin)" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.6" />
+    </svg>
+  );
+}
 
 export default function Login() {
   const { isAuthenticated, loading } = useAuth();
@@ -16,93 +37,145 @@ export default function Login() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-purple-gradient-light">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-purple-gradient-light flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 flex flex-col">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-40 -right-40 w-96 h-96 bg-violet-300/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl"
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fuchsia-200/10 rounded-full blur-3xl"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+
       {/* Header */}
-      <header className="border-b glass sticky top-0 z-50">
-        <div className="container flex h-16 items-center">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <ArrowLeft className="h-5 w-5" />
-            <Volume2 className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">ToneBalance</span>
-          </Link>
-        </div>
+      <header className="relative z-10">
+        <nav className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <ArrowLeft className="h-5 w-5 text-slate-600" />
+              <LogoIcon className="w-10 h-10" />
+              <span className="font-bold text-xl text-slate-800">Tone Balance</span>
+            </Link>
+          </div>
+        </nav>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4 relative z-10">
         <div className="w-full max-w-md space-y-6">
-          <Card className="glass-card">
-            <CardHeader className="text-center pb-2">
-              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                <Volume2 className="h-8 w-8 text-primary" />
-              </div>
-              <CardTitle className="text-2xl">Вход в ToneBalance</CardTitle>
-              <CardDescription>
+          {/* Main Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-violet-500/10 border border-white/50 p-8"
+          >
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="w-20 h-20 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center"
+              >
+                <Volume2 className="h-10 w-10 text-violet-600" />
+              </motion.div>
+            </div>
+
+            {/* Title */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-slate-800 mb-2">Вход в ToneBalance</h1>
+              <p className="text-slate-500">
                 Войдите через VK для доступа к программам голосовой реабилитации
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* VK Sign In */}
-              <VKSignInButton className="w-full flex justify-center" />
-
-              {/* Security info */}
-              <div className="space-y-3 pt-4 border-t">
-                <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                  <Shield className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>Мы не храним ваш пароль — авторизация происходит через VK</span>
-                </div>
-                <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>Ваши данные защищены и используются только для идентификации</span>
-                </div>
-              </div>
-
-              <p className="text-xs text-center text-muted-foreground pt-2">
-                Продолжая, вы соглашаетесь с{" "}
-                <Link href="/terms" className="underline hover:text-primary">
-                  условиями использования
-                </Link>{" "}
-                и{" "}
-                <Link href="/privacy" className="underline hover:text-primary">
-                  политикой конфиденциальности
-                </Link>
               </p>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Benefits */}
-          <Card className="glass-card">
-            <CardContent className="pt-6">
-              <h3 className="font-semibold mb-3">После входа вам будет доступно:</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Бесплатные программы: Введение и Дыхательная гимнастика
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Отслеживание вашего прогресса
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Синхронизация с мобильным приложением
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+            {/* VK Sign In */}
+            <div className="mb-8">
+              <VKSignInButton className="w-full flex justify-center" />
+            </div>
+
+            {/* Security info */}
+            <div className="space-y-4 pt-6 border-t border-slate-100">
+              <div className="flex items-start gap-3 text-sm text-slate-500">
+                <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                  <Shield className="h-4 w-4 text-violet-600" />
+                </div>
+                <span>Мы не храним ваш пароль — авторизация происходит через VK</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm text-slate-500">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                </div>
+                <span>Ваши данные защищены и используются только для идентификации</span>
+              </div>
+            </div>
+
+            {/* Terms */}
+            <p className="text-xs text-center text-slate-400 pt-6">
+              Продолжая, вы соглашаетесь с{" "}
+              <Link href="/terms" className="underline hover:text-violet-600 transition-colors">
+                условиями использования
+              </Link>{" "}
+              и{" "}
+              <Link href="/privacy" className="underline hover:text-violet-600 transition-colors">
+                политикой конфиденциальности
+              </Link>
+            </p>
+          </motion.div>
+
+          {/* Benefits Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-violet-500/10 border border-white/50 p-6"
+          >
+            <h3 className="font-semibold text-slate-800 mb-4">После входа вам будет доступно:</h3>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 text-sm text-slate-600">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                </div>
+                Бесплатные программы: Введение и Дыхательная гимнастика
+              </li>
+              <li className="flex items-center gap-3 text-sm text-slate-600">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                </div>
+                Отслеживание вашего прогресса
+              </li>
+              <li className="flex items-center gap-3 text-sm text-slate-600">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                </div>
+                Синхронизация с мобильным приложением
+              </li>
+            </ul>
+          </motion.div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-4">
-        <div className="container text-center text-sm text-muted-foreground">
+      <footer className="relative z-10 py-6">
+        <div className="container mx-auto text-center text-sm text-slate-400">
           <p>© 2026 ToneBalance. Все права защищены.</p>
         </div>
       </footer>
