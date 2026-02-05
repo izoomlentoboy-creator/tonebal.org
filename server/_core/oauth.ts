@@ -75,28 +75,43 @@ export function registerOAuthRoutes(app: Express) {
     }
   });
 
-  // VK OAuth callback (для стандартного OAuth и fallback кнопки)
+  // VK OAuth callback (для стандартного OAuth)
   app.get("/api/auth/vk/callback", async (req: Request, res: Response) => {
     try {
       const { code, device_id } = req.query;
 
       if (!code || typeof code !== "string") {
+        console.error("[VK Auth] No code provided");
         res.redirect("/login?error=no_code");
+        return;
+      }
+
+      const vkAppSecret = process.env.VK_APP_SECRET;
+      if (!vkAppSecret) {
+        console.error("[VK Auth] VK_APP_SECRET not configured");
+        res.redirect("/login?error=config_error");
         return;
       }
 
       // Обмениваем code на access token через стандартный VK OAuth
       const tokenUrl = new URL("https://oauth.vk.com/access_token");
       tokenUrl.searchParams.set("client_id", "54441764");
-      tokenUrl.searchParams.set("client_secret", process.env.VK_APP_SECRET || "");
+      tokenUrl.searchParams.set("client_secret", vkAppSecret);
       tokenUrl.searchParams.set("redirect_uri", `${ENV.baseUrl}/api/auth/vk/callback`);
       tokenUrl.searchParams.set("code", code);
       if (device_id && typeof device_id === "string") {
         tokenUrl.searchParams.set("device_id", device_id);
       }
 
-      const tokenResponse = await fetch(tokenUrl.toString());
-      const tokenData = await tokenResponse.json();
+      let tokenData: any;
+      try {
+        const tokenResponse = await fetch(tokenUrl.toString());
+        tokenData = await tokenResponse.json();
+      } catch (fetchError) {
+        console.error("[VK Auth] Failed to fetch token:", fetchError);
+        res.redirect("/login?error=network_error");
+        return;
+      }
 
       if (tokenData.error || !tokenData.access_token) {
         console.error("[VK Auth] Token exchange failed:", tokenData);
@@ -109,31 +124,42 @@ export function registerOAuthRoutes(app: Express) {
       const userEmail = tokenData.email || null;
 
       // Получаем информацию о пользователе
-      const userUrl = new URL("https://api.vk.com/method/users.get");
-      userUrl.searchParams.set("user_ids", userId.toString());
-      userUrl.searchParams.set("fields", "photo_200,first_name,last_name");
-      userUrl.searchParams.set("access_token", accessToken);
-      userUrl.searchParams.set("v", "5.131");
-
-      const userResponse = await fetch(userUrl.toString());
-      const userData = await userResponse.json();
-
       let userName = "";
-      if (userData.response && userData.response[0]) {
-        const vkUser = userData.response[0];
-        userName = `${vkUser.first_name || ""} ${vkUser.last_name || ""}`.trim();
+      try {
+        const userUrl = new URL("https://api.vk.com/method/users.get");
+        userUrl.searchParams.set("user_ids", userId.toString());
+        userUrl.searchParams.set("fields", "photo_200,first_name,last_name");
+        userUrl.searchParams.set("access_token", accessToken);
+        userUrl.searchParams.set("v", "5.131");
+
+        const userResponse = await fetch(userUrl.toString());
+        const userData = await userResponse.json();
+
+        if (userData.response && userData.response[0]) {
+          const vkUser = userData.response[0];
+          userName = `${vkUser.first_name || ""} ${vkUser.last_name || ""}`.trim();
+        }
+      } catch (userFetchError) {
+        console.warn("[VK Auth] Failed to fetch user info:", userFetchError);
+        // Continue without user name
       }
 
       const vkUserId = `vk_${userId}`;
 
       // Создаем или обновляем пользователя
-      await db.upsertUser({
-        openId: vkUserId,
-        name: userName || null,
-        email: userEmail,
-        loginMethod: "vk",
-        lastSignedIn: new Date(),
-      });
+      try {
+        await db.upsertUser({
+          openId: vkUserId,
+          name: userName || null,
+          email: userEmail,
+          loginMethod: "vk",
+          lastSignedIn: new Date(),
+        });
+      } catch (dbError) {
+        console.error("[VK Auth] Database error:", dbError);
+        res.redirect("/login?error=db_error");
+        return;
+      }
 
       // Создаем сессию
       const sessionToken = await sdk.createSessionToken(vkUserId, {
@@ -148,7 +174,7 @@ export function registerOAuthRoutes(app: Express) {
       // Редирект на dashboard
       res.redirect("/dashboard");
     } catch (error) {
-      console.error("[VK Auth] Callback failed", error);
+      console.error("[VK Auth] Callback failed:", error);
       res.redirect("/login?error=auth_failed");
     }
   });
