@@ -58,15 +58,16 @@ export function registerOAuthRoutes(app: Express) {
         path: "/",
       });
 
-      // Формируем URL для VK ID OAuth 2.1
+      // Формируем URL для VK ID OAuth 2.1 (параметры как в Web SDK)
       const params = new URLSearchParams({
+        app_id: VK_APP_ID,
         client_id: VK_APP_ID,
         redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
         response_type: "code",
         state: state,
         code_challenge: codeChallenge,
         code_challenge_method: "s256",
-        scope: "", // Базовые права (имя, фото)
+        sdk_type: "vkid",
       });
 
       const authUrl = `https://id.vk.ru/authorize?${params.toString()}`;
@@ -80,9 +81,10 @@ export function registerOAuthRoutes(app: Express) {
   // VK ID callback (обработка OAuth 2.1 authorization code)
   app.get("/api/auth/vk/callback", async (req: Request, res: Response) => {
     try {
-      const { code, state, error, error_description } = req.query;
+      // VK возвращает: code, state, device_id, type, error
+      const { code, state, device_id, type, error, error_description } = req.query;
 
-      console.log("[VK Auth] Callback received:", { code: !!code, state, error });
+      console.log("[VK Auth] Callback received:", { code: !!code, state, device_id, type, error });
 
       // Проверяем ошибки от VK
       if (error) {
@@ -129,27 +131,29 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      // Используем device_id от VK или генерируем свой
+      const deviceId = (typeof device_id === "string" && device_id) ? device_id : crypto.randomUUID();
+
       // Обмениваем authorization code на access_token через VK ID OAuth 2.1
-      // Параметры идут в query string, code - в body (как в официальном SDK)
-      const deviceId = crypto.randomUUID();
-      const tokenQueryParams = new URLSearchParams({
+      // Все параметры идут в form body (как в Android SDK)
+      const tokenFormBody = new URLSearchParams({
         grant_type: "authorization_code",
-        redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
-        client_id: VK_APP_ID,
+        code: code,
         code_verifier: codeVerifier,
+        client_id: VK_APP_ID,
         device_id: deviceId,
+        redirect_uri: `${ENV.baseUrl}/api/auth/vk/callback`,
         state: savedState,
       });
 
       let tokenData: any;
       try {
-        const tokenUrl = `https://id.vk.ru/oauth2/auth?${tokenQueryParams.toString()}`;
-        const tokenResponse = await fetch(tokenUrl, {
+        const tokenResponse = await fetch("https://id.vk.ru/oauth2/auth", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: new URLSearchParams({ code }).toString(),
+          body: tokenFormBody.toString(),
         });
         tokenData = await tokenResponse.json();
         console.log("[VK Auth] Token exchange response:", JSON.stringify(tokenData));
@@ -170,19 +174,20 @@ export function registerOAuthRoutes(app: Express) {
       const userEmail = tokenData.email || null;
 
       // Получаем информацию о пользователе через VK ID user_info endpoint
+      // access_token и device_id в body, client_id в query (как в Android SDK)
       let userName = "";
       try {
-        const userInfoParams = new URLSearchParams({
+        const userInfoBody = new URLSearchParams({
           access_token: accessToken,
-          client_id: VK_APP_ID,
+          device_id: deviceId,
         });
 
-        const userInfoResponse = await fetch("https://id.vk.ru/oauth2/user_info", {
+        const userInfoResponse = await fetch(`https://id.vk.ru/oauth2/user_info?client_id=${VK_APP_ID}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: userInfoParams.toString(),
+          body: userInfoBody.toString(),
         });
         const userInfoData = await userInfoResponse.json();
         console.log("[VK Auth] User info response:", JSON.stringify(userInfoData));
