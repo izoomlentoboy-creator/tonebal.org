@@ -33,11 +33,6 @@ export const subscriptions = pgTable("subscriptions", {
   accessCode: varchar("access_code", { length: 8 }).notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   isActive: integer("is_active").default(1).notNull(),
-  // Code rotation: track when current code was generated
-  codeGeneratedAt: timestamp("code_generated_at").defaultNow().notNull(),
-  // One-time code reveal system
-  codeRevealed: integer("code_revealed").default(0).notNull(),
-  codeRevealedAt: timestamp("code_revealed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

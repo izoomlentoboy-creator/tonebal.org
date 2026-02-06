@@ -1,5 +1,5 @@
 {
-  "id": "8aac81ad-9c4f-419f-909b-7601472697ec",
+  "id": "d71aaba4-4f54-4e88-ba19-8873830723ce",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -118,26 +118,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": 1
-        },
-        "code_generated_at": {
-          "name": "code_generated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "code_revealed": {
-          "name": "code_revealed",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "code_revealed_at": {
-          "name": "code_revealed_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         },
         "created_at": {
           "name": "created_at",

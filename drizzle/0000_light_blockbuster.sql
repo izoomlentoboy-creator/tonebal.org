@@ -19,9 +19,6 @@ CREATE TABLE "subscriptions" (
 	"access_code" varchar(8) NOT NULL,
 	"expires_at" timestamp NOT NULL,
 	"is_active" integer DEFAULT 1 NOT NULL,
-	"code_generated_at" timestamp DEFAULT now() NOT NULL,
-	"code_revealed" integer DEFAULT 0 NOT NULL,
-	"code_revealed_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "subscriptions_access_code_unique" UNIQUE("access_code")

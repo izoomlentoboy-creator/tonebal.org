@@ -146,9 +146,6 @@ export async function rotateSubscriptionCode(subscriptionId: number, newCode: st
     .update(subscriptions)
     .set({
       accessCode: newCode,
-      codeGeneratedAt: new Date(),
-      codeRevealed: 0,
-      codeRevealedAt: null,
       updatedAt: new Date(),
     })
     .where(eq(subscriptions.id, subscriptionId));
@@ -354,53 +351,13 @@ export async function setUserDirection(userId: number, nosologyId: string) {
   }
 }
 
-// Subscription Code Reveal
-export async function revealAccessCode(subscriptionId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  await db
-    .update(subscriptions)
-    .set({
-      codeRevealed: 1,
-      codeRevealedAt: new Date(),
-    })
-    .where(eq(subscriptions.id, subscriptionId));
+// Subscription Code Reveal (no-op stubs until columns are added via migration)
+export async function revealAccessCode(_subscriptionId: number) {
+  // TODO: add code_revealed/code_revealed_at columns to subscriptions table
 }
 
-export async function cancelCodeReveal(subscriptionId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  // Only allow cancel within 5 minutes of reveal
-  const sub = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.id, subscriptionId))
-    .limit(1);
-
-  if (sub.length === 0) {
-    throw new Error("Subscription not found");
-  }
-
-  const subscription = sub[0];
-
-  if (!subscription.codeRevealedAt) {
-    throw new Error("Code was not revealed");
-  }
-
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-  if (subscription.codeRevealedAt < fiveMinutesAgo) {
-    throw new Error("Cancel window expired (5 minutes)");
-  }
-
-  await db
-    .update(subscriptions)
-    .set({
-      codeRevealed: 0,
-      codeRevealedAt: null,
-    })
-    .where(eq(subscriptions.id, subscriptionId));
+export async function cancelCodeReveal(_subscriptionId: number) {
+  // TODO: add code_revealed/code_revealed_at columns to subscriptions table
 }
 
 // Progress Calendar - Get unique days with completed lessons
