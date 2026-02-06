@@ -30,6 +30,9 @@ import {
   Download,
   Calendar,
   CreditCard,
+  RefreshCw,
+  Compass,
+  CheckCircle2,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -42,9 +45,13 @@ export default function Profile() {
   const [codeCopied, setCodeCopied] = useState(false);
   const [showRevealDialog, setShowRevealDialog] = useState(false);
   const [cancelTimeLeft, setCancelTimeLeft] = useState<number | null>(null);
+  const [directionOpen, setDirectionOpen] = useState(false);
+  const [selectedDirections, setSelectedDirections] = useState<string[]>([]);
   const utils = trpc.useUtils();
 
   const { data: subscription } = trpc.subscription.getMy.useQuery();
+  const { data: nosologies } = trpc.nosologies.getAll.useQuery();
+  const { data: directions } = trpc.direction.getMy.useQuery();
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -89,6 +96,18 @@ export default function Profile() {
     },
   });
 
+  const setDirectionsMutation = trpc.direction.setMy.useMutation({
+    onSuccess: () => {
+      toast.success("Направления обновлены");
+      utils.direction.getMy.invalidate();
+      utils.progress.getDailyProgress.invalidate();
+      setDirectionOpen(false);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
   useEffect(() => {
     if (subscription?.canCancelReveal && subscription?.codeRevealedAt) {
       const revealTime = new Date(subscription.codeRevealedAt).getTime();
@@ -115,6 +134,12 @@ export default function Profile() {
 
     return () => clearInterval(timer);
   }, [cancelTimeLeft]);
+
+  useEffect(() => {
+    if (directions) {
+      setSelectedDirections(directions.map((d: any) => d.nosologyId));
+    }
+  }, [directions]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -147,9 +172,24 @@ export default function Profile() {
     cancelRevealMutation.mutate();
   };
 
+  const toggleDirection = (id: string) => {
+    setSelectedDirections((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSaveDirections = () => {
+    if (selectedDirections.length === 0) {
+      toast.error("Выберите хотя бы одно направление");
+      return;
+    }
+    setDirectionsMutation.mutate({ nosologyIds: selectedDirections });
+  };
+
   const hasSubscription = subscription && subscription.isActive === 1;
   const isCodeMasked = subscription?.accessCodeMasked;
   const canCancel = subscription?.canCancelReveal && cancelTimeLeft && cancelTimeLeft > 0;
+  const codeRotation = subscription?.codeRotation;
 
   return (
     <div className="min-h-screen bg-[#FDFBFF] font-sans">
@@ -228,6 +268,80 @@ export default function Profile() {
               </div>
             </motion.div>
 
+            {/* Directions Management */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Compass className="h-5 w-5 text-[#7C3AED]" />
+                  Мои направления
+                </h2>
+                <button
+                  onClick={() => setDirectionOpen(!directionOpen)}
+                  className="text-sm font-bold text-[#7C3AED] hover:text-[#6D28D9] transition-colors"
+                >
+                  {directionOpen ? "Закрыть" : "Изменить"}
+                </button>
+              </div>
+
+              {!directionOpen && directions && directions.length > 0 ? (
+                <div className="space-y-2">
+                  {directions.map((dir: any) => (
+                    <div key={dir.nosologyId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                      <span className="text-2xl">{dir.nosology?.icon || "?"}</span>
+                      <div>
+                        <p className="font-medium text-sm text-slate-900">{dir.nosology?.name || dir.nosologyId}</p>
+                        <p className="text-xs text-slate-500">{dir.nosology?.lessonCount || 0} уроков</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : !directionOpen && (!directions || directions.length === 0) ? (
+                <p className="text-sm text-slate-500">Направления не выбраны</p>
+              ) : null}
+
+              {directionOpen && nosologies && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-1">
+                    {nosologies
+                      .filter((n: any) => !n.isFree)
+                      .map((n: any) => {
+                        const isSelected = selectedDirections.includes(n.id);
+                        return (
+                          <button
+                            key={n.id}
+                            onClick={() => toggleDirection(n.id)}
+                            className={`flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
+                              isSelected
+                                ? "bg-[#7C3AED]/10 border-2 border-[#7C3AED]"
+                                : "bg-white border-2 border-slate-100 hover:border-purple-200"
+                            }`}
+                          >
+                            <span className="text-2xl">{n.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{n.name}</p>
+                              <p className="text-xs text-slate-400">{n.lessonCount} уроков</p>
+                            </div>
+                            {isSelected && <CheckCircle2 className="h-5 w-5 text-[#7C3AED] shrink-0" />}
+                          </button>
+                        );
+                      })}
+                  </div>
+                  <Button
+                    onClick={handleSaveDirections}
+                    disabled={setDirectionsMutation.isPending || selectedDirections.length === 0}
+                    className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] rounded-xl"
+                  >
+                    Сохранить ({selectedDirections.length})
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+
             {/* Subscription & Access Code */}
             {hasSubscription && subscription ? (
               <motion.div
@@ -249,6 +363,35 @@ export default function Profile() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Code Rotation Info */}
+                  {codeRotation && (
+                    <div className={`rounded-xl p-4 mb-4 ${
+                      codeRotation.showWarning1Day
+                        ? "bg-red-50 border border-red-200"
+                        : codeRotation.showWarning7Days
+                        ? "bg-amber-50 border border-amber-200"
+                        : "bg-slate-50 border border-slate-100"
+                    }`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <RefreshCw className={`h-4 w-4 ${
+                          codeRotation.showWarning1Day ? "text-red-500" : codeRotation.showWarning7Days ? "text-amber-500" : "text-slate-400"
+                        }`} />
+                        <span className={`text-sm font-medium ${
+                          codeRotation.showWarning1Day ? "text-red-800" : codeRotation.showWarning7Days ? "text-amber-800" : "text-slate-700"
+                        }`}>
+                          {codeRotation.showWarning1Day
+                            ? "Код обновится завтра!"
+                            : codeRotation.showWarning7Days
+                            ? `Код обновится через ${codeRotation.daysUntilRotation} дн.`
+                            : `Следующее обновление кода через ${codeRotation.daysUntilRotation} дн.`}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 ml-6">
+                        Код обновляется каждые 30 дней. После обновления введите новый код в iOS приложении.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Access Code Section */}
                   <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white mb-6">
@@ -298,7 +441,7 @@ export default function Profile() {
                                 <ul className="list-disc list-inside space-y-1">
                                   <li>Код можно раскрыть только один раз</li>
                                   <li>У вас будет 5 минут, чтобы отменить раскрытие</li>
-                                  <li>После подтверждения в приложении код исчезнет</li>
+                                  <li>Код обновляется каждые 30 дней</li>
                                 </ul>
                               </div>
                               <p className="text-sm">

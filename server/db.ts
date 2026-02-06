@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import {
@@ -135,6 +135,23 @@ export async function getSubscriptionByCode(accessCode: string) {
     .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+// Update subscription code (for rotation)
+export async function rotateSubscriptionCode(subscriptionId: number, newCode: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(subscriptions)
+    .set({
+      accessCode: newCode,
+      codeGeneratedAt: new Date(),
+      codeRevealed: 0,
+      codeRevealedAt: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(subscriptions.id, subscriptionId));
 }
 
 // Payments
@@ -274,7 +291,36 @@ export async function getVoiceRatingsByDateRange(
     .orderBy(voiceRatings.ratedAt);
 }
 
-// User Directions
+// User Directions (multiple)
+export async function getUserDirections(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(userDirections)
+    .where(eq(userDirections.userId, userId))
+    .orderBy(userDirections.selectedAt);
+}
+
+export async function setUserDirections(userId: number, nosologyIds: string[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Delete all existing directions for user
+  await db.delete(userDirections).where(eq(userDirections.userId, userId));
+
+  // Insert new directions
+  if (nosologyIds.length > 0) {
+    const values = nosologyIds.map(nosologyId => ({
+      userId,
+      nosologyId,
+    }));
+    await db.insert(userDirections).values(values);
+  }
+}
+
+// Legacy single direction support (returns first direction)
 export async function getUserDirection(userId: number) {
   const db = await getDb();
   if (!db) return undefined;
@@ -295,15 +341,15 @@ export async function setUserDirection(userId: number, nosologyId: string) {
   const existing = await db
     .select()
     .from(userDirections)
-    .where(eq(userDirections.userId, userId))
+    .where(
+      and(
+        eq(userDirections.userId, userId),
+        eq(userDirections.nosologyId, nosologyId)
+      )
+    )
     .limit(1);
 
-  if (existing.length > 0) {
-    await db
-      .update(userDirections)
-      .set({ nosologyId, updatedAt: new Date() })
-      .where(eq(userDirections.userId, userId));
-  } else {
+  if (existing.length === 0) {
     await db.insert(userDirections).values({ userId, nosologyId });
   }
 }
@@ -430,4 +476,123 @@ export async function getActivityStats(userId: number, days = 7) {
   }
 
   return result;
+}
+
+// Get lessons completed today (timezone-aware)
+export async function getTodayCompletedLessons(userId: number, timezone: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Calculate today's start/end in user's timezone
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const todayStr = formatter.format(now); // YYYY-MM-DD
+
+  // Create start/end of day in user's timezone
+  const startOfDay = new Date(`${todayStr}T00:00:00`);
+  const endOfDay = new Date(`${todayStr}T23:59:59.999`);
+
+  // Adjust to UTC by reversing timezone offset
+  const tzOffset = getTimezoneOffsetMinutes(timezone, now);
+  const startUTC = new Date(startOfDay.getTime() + tzOffset * 60 * 1000);
+  const endUTC = new Date(endOfDay.getTime() + tzOffset * 60 * 1000);
+
+  return await db
+    .select()
+    .from(userProgress)
+    .where(
+      and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.completed, 1),
+        gte(userProgress.completedAt, startUTC),
+        lte(userProgress.completedAt, endUTC)
+      )
+    );
+}
+
+// Helper to get timezone offset in minutes
+function getTimezoneOffsetMinutes(timezone: string, date: Date): number {
+  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+  return (utcDate.getTime() - tzDate.getTime()) / (60 * 1000);
+}
+
+// Update user timezone
+export async function updateUserTimezone(userId: number, timezone: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(users)
+    .set({ timezone, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+// Get user's activity streak (consecutive days)
+export async function getActivityStreak(userId: number, timezone: string): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  // Get all completed dates
+  const progress = await db
+    .select()
+    .from(userProgress)
+    .where(
+      and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.completed, 1)
+      )
+    )
+    .orderBy(desc(userProgress.completedAt));
+
+  if (progress.length === 0) return 0;
+
+  // Get unique dates in user's timezone
+  const uniqueDates = new Set<string>();
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+  progress.forEach(p => {
+    if (p.completedAt) {
+      uniqueDates.add(formatter.format(new Date(p.completedAt)));
+    }
+  });
+
+  const sortedDates = Array.from(uniqueDates).sort().reverse();
+
+  // Check streak starting from today
+  const today = formatter.format(new Date());
+  let streak = 0;
+  let checkDate = new Date();
+
+  // If today has activity, start counting from today, else from yesterday
+  if (sortedDates[0] !== today) {
+    // Check if yesterday had activity
+    checkDate.setDate(checkDate.getDate() - 1);
+    const yesterday = formatter.format(checkDate);
+    if (sortedDates[0] !== yesterday) {
+      return 0;
+    }
+  }
+
+  for (let i = 0; i < 365; i++) {
+    const dateStr = formatter.format(checkDate);
+    if (uniqueDates.has(dateStr)) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
 }

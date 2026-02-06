@@ -174,3 +174,66 @@ export function getDaysRemaining(expiresAt: Date): number {
 export function getDaysForPlan(plan: SubscriptionPlan): number {
   return plan === 'yearly' ? 365 : 30;
 }
+
+/**
+ * Code rotation period in days
+ */
+const CODE_ROTATION_DAYS = 30;
+
+/**
+ * Check if a code needs rotation
+ * Returns true if 30+ days have passed since the code was generated
+ * and the subscription hasn't expired yet
+ */
+export function shouldRotateCode(codeGeneratedAt: Date, expiresAt: Date): boolean {
+  const now = new Date();
+  // Don't rotate if subscription is expired
+  if (now >= new Date(expiresAt)) return false;
+
+  const generated = new Date(codeGeneratedAt);
+  const daysSinceGeneration = Math.floor(
+    (now.getTime() - generated.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  return daysSinceGeneration >= CODE_ROTATION_DAYS;
+}
+
+/**
+ * Get information about code rotation timing
+ */
+export function getCodeRotationInfo(codeGeneratedAt: Date, expiresAt: Date): {
+  nextRotationDate: string;
+  daysUntilRotation: number;
+  showWarning7Days: boolean;
+  showWarning1Day: boolean;
+} {
+  const now = new Date();
+  const generated = new Date(codeGeneratedAt);
+  const expires = new Date(expiresAt);
+
+  // Next rotation is 30 days after generation
+  const nextRotation = new Date(generated);
+  nextRotation.setDate(nextRotation.getDate() + CODE_ROTATION_DAYS);
+
+  // If next rotation is after expiry, no more rotations
+  if (nextRotation >= expires) {
+    return {
+      nextRotationDate: expires.toISOString(),
+      daysUntilRotation: Math.max(0, Math.ceil((expires.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))),
+      showWarning7Days: false,
+      showWarning1Day: false,
+    };
+  }
+
+  const daysUntilRotation = Math.max(
+    0,
+    Math.ceil((nextRotation.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  );
+
+  return {
+    nextRotationDate: nextRotation.toISOString(),
+    daysUntilRotation,
+    showWarning7Days: daysUntilRotation <= 7 && daysUntilRotation > 1,
+    showWarning1Day: daysUntilRotation <= 1,
+  };
+}
