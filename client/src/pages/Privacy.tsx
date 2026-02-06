@@ -43,7 +43,8 @@ export default function Privacy() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4">2. Оператор персональных данных</h2>
             <p>
-              Оператором персональных данных является Правообладатель Сервиса.
+              Оператором персональных данных является самозанятый Баймуратов Айрат Маратович
+              (ИНН: 023818270238).
             </p>
             <p className="mt-4">
               <strong>Контактные данные для вопросов по защите персональных данных:</strong><br />
@@ -194,6 +195,8 @@ export default function Privacy() {
               По вопросам, связанным с обработкой персональных данных:
             </p>
             <ul className="list-none mt-4 space-y-2">
+              <li><strong>Правообладатель:</strong> самозанятый Баймуратов Айрат Маратович</li>
+              <li><strong>ИНН:</strong> 023818270238</li>
               <li><strong>Email:</strong> support@tonebal.org</li>
               <li><strong>Сайт:</strong> https://tonebal.org</li>
             </ul>

@@ -2,7 +2,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VKSignInButton } from "@/components/VKSignInButton";
-import { ToneBalanceLogo, ToneBalanceIcon } from "@/components/ToneBalanceLogo";
 import { trpc } from "@/lib/trpc";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
@@ -30,11 +29,6 @@ import {
 import { useState } from "react";
 import { Link } from "wouter";
 
-// Используем новый логотип
-const LogoIcon = ({ className = "w-10 h-10" }: { className?: string }) => (
-  <ToneBalanceLogo className={className} size={40} />
-);
-
 // --- Web Dashboard Mockup ---
 const WebDashboardMockup = () => (
   <div className="w-full bg-white rounded-[1.5rem] shadow-2xl border border-slate-200/60 overflow-hidden relative font-sans text-left">
@@ -55,7 +49,6 @@ const WebDashboardMockup = () => (
       <div className="w-14 lg:w-48 bg-white border-r border-slate-100 p-3 flex flex-col justify-between shrink-0">
         <div className="space-y-4">
           <div className="flex items-center gap-3 text-[#7C3AED] font-bold px-2">
-            <LogoIcon className="w-6 h-6" />
             <span className="hidden lg:block text-base tracking-tight">Tone</span>
           </div>
           <div className="space-y-1">
@@ -290,9 +283,6 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-purple-100/50 transition-all duration-300">
         <div className="container mx-auto px-4 md:px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2.5 cursor-pointer group">
-            <div className="bg-white rounded-xl shadow-sm p-1 border border-purple-50 group-hover:shadow-md transition-shadow">
-              <LogoIcon className="w-7 h-7" />
-            </div>
             <span className="font-bold text-lg tracking-tight text-slate-900">Tone Balance</span>
           </div>
 
@@ -335,7 +325,6 @@ export default function Home() {
           >
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-2">
-                <LogoIcon className="w-8 h-8" />
                 <span className="font-bold text-xl">Tone Balance</span>
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-slate-50 rounded-full">
@@ -656,10 +645,6 @@ export default function Home() {
       {/* CTA Footer */}
       <footer className="py-16 bg-white border-t border-slate-100">
         <div className="container mx-auto px-4 md:px-6 text-center">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-slate-100">
-            <LogoIcon className="w-10 h-10" />
-          </div>
-
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
             Tone Balance
           </h2>
@@ -674,7 +659,10 @@ export default function Home() {
           )}
 
           <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-400">
-            <p>© 2026 Tone Balance</p>
+            <div className="text-center md:text-left">
+              <p>© 2026 Tone Balance</p>
+              <p className="mt-1">Самозанятый Баймуратов А.М. ИНН: 023818270238</p>
+            </div>
             <div className="flex gap-6 mt-4 md:mt-0">
               <Link href="/privacy" className="hover:text-slate-900 transition-colors">
                 Политика конфиденциальности

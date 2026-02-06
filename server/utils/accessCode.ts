@@ -145,26 +145,44 @@ export function formatAccessCode(code: string): string {
 
 /**
  * Вычисление даты истечения подписки
+ * Нормализует к началу дня (00:00:00 UTC), чтобы отсчёт дней
+ * корректно уменьшался после полуночи.
  * @param daysToAdd - количество дней для добавления
  * @param baseDate - базовая дата (если не указана, используется текущая дата)
  */
 export function calculateExpiryDate(daysToAdd: number = 30, baseDate?: Date): Date {
-  // Если есть базовая дата и она в будущем - добавляем дни к ней
-  // Иначе добавляем к текущей дате
   const now = new Date();
-  const base = baseDate && new Date(baseDate) > now ? new Date(baseDate) : now;
-  base.setDate(base.getDate() + daysToAdd);
+  // Нормализуем текущую дату к началу дня (UTC)
+  const nowStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  let base: Date;
+  if (baseDate) {
+    const bd = new Date(baseDate);
+    const bdStart = new Date(Date.UTC(bd.getUTCFullYear(), bd.getUTCMonth(), bd.getUTCDate()));
+    // Если базовая дата в будущем - добавляем дни к ней
+    base = bdStart > nowStart ? bdStart : nowStart;
+  } else {
+    base = nowStart;
+  }
+
+  base.setUTCDate(base.getUTCDate() + daysToAdd);
   return base;
 }
 
 /**
  * Вычисление оставшихся дней до истечения
+ * Сравнивает только даты (без времени), чтобы отсчёт уменьшался
+ * ровно после полуночи (UTC).
  */
 export function getDaysRemaining(expiresAt: Date): number {
   const now = new Date();
   const expiry = new Date(expiresAt);
-  const diffTime = expiry.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  // Нормализуем обе даты к началу дня (UTC)
+  const nowDate = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const expiryDate = Date.UTC(expiry.getUTCFullYear(), expiry.getUTCMonth(), expiry.getUTCDate());
+
+  const diffDays = Math.round((expiryDate - nowDate) / (1000 * 60 * 60 * 24));
   return Math.max(0, diffDays);
 }
 

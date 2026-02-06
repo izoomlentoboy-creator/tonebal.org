@@ -1,6 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +37,16 @@ import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+
+// Calculate days remaining using user's local timezone
+const getLocalDaysRemaining = (expiresAt: string | Date): number => {
+  const now = new Date();
+  const expiry = new Date(expiresAt);
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const expiryDate = new Date(expiry.getFullYear(), expiry.getMonth(), expiry.getDate());
+  const diffDays = Math.round((expiryDate.getTime() - nowDate.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
 
 export default function Profile() {
   const { user } = useAuth();
@@ -201,7 +210,6 @@ export default function Profile() {
             </Link>
           </Button>
           <Link href="/" className="flex items-center gap-2">
-            <ToneBalanceLogo className="w-8 h-8" size={32} />
             <span className="font-bold text-lg tracking-tight text-slate-900 hidden sm:block">Tone Balance</span>
           </Link>
         </div>
@@ -483,7 +491,7 @@ export default function Profile() {
                       <div className="flex items-center justify-center gap-2 mb-2">
                         <Calendar className="h-4 w-4 text-[#7C3AED]" />
                       </div>
-                      <p className="text-3xl font-bold text-slate-900">{subscription.daysRemaining}</p>
+                      <p className="text-3xl font-bold text-slate-900">{getLocalDaysRemaining(subscription.expiresAt)}</p>
                       <p className="text-xs text-slate-500">дней осталось</p>
                     </div>
                     <div className="bg-slate-50 p-4 rounded-2xl text-center">

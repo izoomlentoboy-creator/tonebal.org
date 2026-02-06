@@ -9,6 +9,16 @@ import { useEffect, useState } from "react";
 
 type PlanType = "monthly" | "yearly";
 
+// Calculate days remaining using user's local timezone
+const getLocalDaysRemaining = (expiresAt: string | Date): number => {
+  const now = new Date();
+  const expiry = new Date(expiresAt);
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const expiryDate = new Date(expiry.getFullYear(), expiry.getMonth(), expiry.getDate());
+  const diffDays = Math.round((expiryDate.getTime() - nowDate.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
+
 export default function Payment() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -293,7 +303,7 @@ export default function Payment() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Осталось дней: <span className="font-bold text-foreground">{subscription.daysRemaining}</span>
+                    Осталось дней: <span className="font-bold text-foreground">{getLocalDaysRemaining(subscription.expiresAt)}</span>
                   </p>
                   <p className="text-sm text-muted-foreground">
                     После оплаты срок подписки будет продлён на {currentDays} дней
