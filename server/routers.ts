@@ -260,8 +260,7 @@ export const appRouter = router({
 
     // Get daily XP progress (timezone-aware)
     getDailyProgress: protectedProcedure.query(async ({ ctx }) => {
-      const user = await db.getUserById(ctx.user.id);
-      const timezone = user?.timezone || "Europe/Moscow";
+      const timezone = "Europe/Moscow";
 
       // Get user's selected directions
       const directions = await db.getUserDirections(ctx.user.id);

@@ -54,7 +54,6 @@ CREATE TABLE "users" (
 	"email" varchar(320),
 	"login_method" varchar(64),
 	"role" "role" DEFAULT 'user' NOT NULL,
-	"timezone" varchar(64) DEFAULT 'Europe/Moscow',
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"last_signed_in" timestamp DEFAULT now() NOT NULL,
