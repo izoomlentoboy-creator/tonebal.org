@@ -2,25 +2,19 @@ import { integer, pgEnum, pgTable, serial, text, timestamp, varchar, unique } fr
 
 /**
  * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
  */
 
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 export const paymentStatusEnum = pgEnum("payment_status", ["pending", "succeeded", "canceled"]);
 
 export const users = pgTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: serial("id").primaryKey(),
-  /** User identifier from OAuth provider (Apple ID, email hash, etc.). Unique per user. */
   openId: varchar("open_id", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("login_method", { length: 64 }),
   role: roleEnum("role").default("user").notNull(),
+  timezone: varchar("timezone", { length: 64 }).default("Europe/Moscow"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastSignedIn: timestamp("last_signed_in").defaultNow().notNull(),
@@ -31,6 +25,7 @@ export type InsertUser = typeof users.$inferInsert;
 
 /**
  * Subscriptions table - stores user subscriptions and access codes
+ * Codes rotate every 30 days within the subscription period
  */
 export const subscriptions = pgTable("subscriptions", {
   id: serial("id").primaryKey(),
@@ -39,9 +34,11 @@ export const subscriptions = pgTable("subscriptions", {
   accessCode: varchar("access_code", { length: 8 }).notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   isActive: integer("is_active").default(1).notNull(),
+  // Code rotation: track when current code was generated
+  codeGeneratedAt: timestamp("code_generated_at").defaultNow().notNull(),
   // One-time code reveal system
-  codeRevealed: integer("code_revealed").default(0).notNull(), // 0 = hidden, 1 = revealed and used
-  codeRevealedAt: timestamp("code_revealed_at"), // When code was revealed (for 5-min cancel window)
+  codeRevealed: integer("code_revealed").default(0).notNull(),
+  codeRevealedAt: timestamp("code_revealed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -95,7 +92,7 @@ export const voiceRatings = pgTable("voice_ratings", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   rating: integer("rating").notNull(), // 1-10
-  note: text("note"), // Optional note about feelings
+  note: text("note"),
   ratedAt: timestamp("rated_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -104,15 +101,22 @@ export type VoiceRating = typeof voiceRatings.$inferSelect;
 export type InsertVoiceRating = typeof voiceRatings.$inferInsert;
 
 /**
- * User directions table - stores user's selected rehabilitation direction
+ * User directions table - stores user's selected rehabilitation directions (multiple allowed)
+ * Unique constraint on (userId, nosologyId) to prevent duplicates
  */
-export const userDirections = pgTable("user_directions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().unique(),
-  nosologyId: varchar("nosology_id", { length: 50 }).notNull(),
-  selectedAt: timestamp("selected_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const userDirections = pgTable(
+  "user_directions",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    nosologyId: varchar("nosology_id", { length: 50 }).notNull(),
+    selectedAt: timestamp("selected_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("unique_user_direction").on(table.userId, table.nosologyId)
+  ]
+);
 
 export type UserDirection = typeof userDirections.$inferSelect;
 export type InsertUserDirection = typeof userDirections.$inferInsert;

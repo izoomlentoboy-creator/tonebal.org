@@ -12,6 +12,8 @@ import {
   getDaysRemaining,
   validateAccessCode,
   normalizeAccessCode,
+  shouldRotateCode,
+  getCodeRotationInfo,
 } from "./utils/accessCode.js";
 import { createPayment, getPaymentStatus } from "./services/yookassa.js";
 import nosologiesData from "../shared/nosologies.json" with { type: "json" };
@@ -40,7 +42,7 @@ type NosologyData = {
 
 export const appRouter = router({
   system: systemRouter,
-  
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: protectedProcedure.mutation(({ ctx }) => {
@@ -55,7 +57,7 @@ export const appRouter = router({
     getAll: publicProcedure.query(() => {
       return Object.values(nosologiesData);
     }),
-    
+
     getById: publicProcedure
       .input(z.object({ id: z.string() }))
       .query(({ input }) => {
@@ -65,23 +67,23 @@ export const appRouter = router({
         }
         return nosology;
       }),
-    
+
     getLesson: publicProcedure
-      .input(z.object({ 
+      .input(z.object({
         nosologyId: z.string(),
-        lessonId: z.string() 
+        lessonId: z.string()
       }))
       .query(({ input }) => {
         const nosology = nosologiesData[input.nosologyId as keyof typeof nosologiesData];
         if (!nosology) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Nosology not found" });
         }
-        
+
         const lesson = nosology.lessons.find(l => l.id === input.lessonId);
         if (!lesson) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Lesson not found" });
         }
-        
+
         return lesson;
       }),
   }),
@@ -95,12 +97,35 @@ export const appRouter = router({
         return null;
       }
 
+      // Check if code needs rotation
+      if (shouldRotateCode(subscription.codeGeneratedAt, subscription.expiresAt)) {
+        // Determine plan type by checking payment
+        const plan = subscription.paymentId ? 'monthly' : 'monthly';
+        const newCode = generateAccessCode(plan);
+        await db.rotateSubscriptionCode(subscription.id, newCode);
+        // Refetch after rotation
+        const updated = await db.getActiveSubscription(ctx.user.id);
+        if (!updated) return null;
+
+        const rotationInfo = getCodeRotationInfo(updated.codeGeneratedAt, updated.expiresAt);
+        return {
+          ...updated,
+          daysRemaining: getDaysRemaining(updated.expiresAt),
+          canCancelReveal: false,
+          accessCode: "****-****",
+          accessCodeMasked: true,
+          codeRotation: rotationInfo,
+        };
+      }
+
       // Calculate if cancel is still possible (within 5 minutes of reveal)
       let canCancelReveal = false;
       if (subscription.codeRevealed === 1 && subscription.codeRevealedAt) {
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         canCancelReveal = subscription.codeRevealedAt > fiveMinutesAgo;
       }
+
+      const rotationInfo = getCodeRotationInfo(subscription.codeGeneratedAt, subscription.expiresAt);
 
       return {
         ...subscription,
@@ -110,6 +135,7 @@ export const appRouter = router({
         accessCode:
           subscription.codeRevealed === 1 ? subscription.accessCode : "****-****",
         accessCodeMasked: subscription.codeRevealed !== 1,
+        codeRotation: rotationInfo,
       };
     }),
 
@@ -231,6 +257,71 @@ export const appRouter = router({
           completionPercent: Math.round((completedLessons / totalLessons) * 100),
         };
       }),
+
+    // Get daily XP progress (timezone-aware)
+    getDailyProgress: protectedProcedure.query(async ({ ctx }) => {
+      const user = await db.getUserById(ctx.user.id);
+      const timezone = user?.timezone || "Europe/Moscow";
+
+      // Get user's selected directions
+      const directions = await db.getUserDirections(ctx.user.id);
+
+      if (directions.length === 0) {
+        return {
+          totalRequired: 0,
+          completedToday: 0,
+          percent: 0,
+          streak: 0,
+          directions: [],
+        };
+      }
+
+      // Count total lessons across all directions
+      let totalRequired = 0;
+      const directionDetails: Array<{
+        nosologyId: string;
+        name: string;
+        icon: string;
+        totalLessons: number;
+        completedToday: number;
+      }> = [];
+
+      for (const dir of directions) {
+        const nosology = nosologiesData[dir.nosologyId as keyof typeof nosologiesData] as NosologyData | undefined;
+        if (nosology) {
+          totalRequired += nosology.lessonCount;
+          directionDetails.push({
+            nosologyId: dir.nosologyId,
+            name: nosology.name,
+            icon: nosology.icon,
+            totalLessons: nosology.lessonCount,
+            completedToday: 0,
+          });
+        }
+      }
+
+      // Get lessons completed today
+      const todayLessons = await db.getTodayCompletedLessons(ctx.user.id, timezone);
+      const completedToday = todayLessons.length;
+
+      // Count per direction
+      for (const detail of directionDetails) {
+        detail.completedToday = todayLessons.filter(
+          l => l.nosologyId === detail.nosologyId
+        ).length;
+      }
+
+      // Get streak
+      const streak = await db.getActivityStreak(ctx.user.id, timezone);
+
+      return {
+        totalRequired,
+        completedToday,
+        percent: totalRequired > 0 ? Math.round((completedToday / totalRequired) * 100) : 0,
+        streak,
+        directions: directionDetails,
+      };
+    }),
   }),
 
   // Voice Ratings
@@ -277,35 +368,69 @@ export const appRouter = router({
       }),
   }),
 
-  // User Direction (selected rehabilitation program)
+  // User Directions (supports multiple selections)
   direction: router({
     getMy: protectedProcedure.query(async ({ ctx }) => {
-      const direction = await db.getUserDirection(ctx.user.id);
-      if (!direction) return null;
+      const directions = await db.getUserDirections(ctx.user.id);
 
-      const nosology = nosologiesData[direction.nosologyId as keyof typeof nosologiesData];
-      return {
-        ...direction,
-        nosology: nosology || null,
-      };
+      return directions.map(dir => {
+        const nosology = nosologiesData[dir.nosologyId as keyof typeof nosologiesData];
+        return {
+          ...dir,
+          nosology: nosology || null,
+        };
+      });
     }),
 
     setMy: protectedProcedure
       .input(
         z.object({
-          nosologyId: z.string(),
+          nosologyIds: z.array(z.string()).min(1),
         })
       )
       .mutation(async ({ ctx, input }) => {
-        // Verify nosology exists and is not free (free ones don't need direction)
-        const nosology = nosologiesData[input.nosologyId as keyof typeof nosologiesData];
-        if (!nosology) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Направление не найдено" });
+        // Verify all nosologies exist
+        for (const id of input.nosologyIds) {
+          const nosology = nosologiesData[id as keyof typeof nosologiesData];
+          if (!nosology) {
+            throw new TRPCError({ code: "NOT_FOUND", message: `Направление ${id} не найдено` });
+          }
         }
 
-        await db.setUserDirection(ctx.user.id, input.nosologyId);
+        await db.setUserDirections(ctx.user.id, input.nosologyIds);
         return { success: true };
       }),
+  }),
+
+  // User management
+  user: router({
+    setTimezone: protectedProcedure
+      .input(z.object({
+        timezone: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateUserTimezone(ctx.user.id, input.timezone);
+        return { success: true };
+      }),
+
+    updatePassword: protectedProcedure
+      .input(z.object({
+        currentPassword: z.string(),
+        newPassword: z.string().min(6),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        throw new TRPCError({
+          code: "NOT_IMPLEMENTED",
+          message: "Password change not available for OAuth users"
+        });
+      }),
+
+    deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
+      throw new TRPCError({
+        code: "NOT_IMPLEMENTED",
+        message: "Account deletion coming soon"
+      });
+    }),
   }),
 
   // Payment (YooKassa integration)
@@ -583,9 +708,7 @@ export const appRouter = router({
           }
         }
 
-        // Код ещё не использован - это означает, что код был сгенерирован
-        // сервером при оплате, но ещё не привязан к подписке
-        // Или это невалидный код (не существует в системе)
+        // Код ещё не использован
         return {
           success: false,
           error: "Code not found or not yet activated",
@@ -635,32 +758,6 @@ export const appRouter = router({
           daysRemaining: getDaysRemaining(subscription.expiresAt),
         };
       }),
-  }),
-
-  // User management
-  user: router({
-    updatePassword: protectedProcedure
-      .input(z.object({
-        currentPassword: z.string(),
-        newPassword: z.string().min(6),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        // TODO: Implement password change with hashing
-        // Не доступно для OAuth пользователей
-        throw new TRPCError({ 
-          code: "NOT_IMPLEMENTED", 
-          message: "Password change not available for OAuth users" 
-        });
-      }),
-    
-    deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
-      // TODO: Implement account deletion
-      // Удаление пользователя и всех связанных данных
-      throw new TRPCError({ 
-        code: "NOT_IMPLEMENTED", 
-        message: "Account deletion coming soon" 
-      });
-    }),
   }),
 });
 

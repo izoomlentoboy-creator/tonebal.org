@@ -485,6 +485,9 @@ function VideoPlayer({ videoUrl, title }: { videoUrl: string; title: string }) {
         className="w-full h-full object-contain"
         src={videoUrl}
         playsInline
+        controlsList="nodownload nofullscreen noremoteplayback"
+        disablePictureInPicture
+        onContextMenu={(e) => e.preventDefault()}
         onClick={togglePlay}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
