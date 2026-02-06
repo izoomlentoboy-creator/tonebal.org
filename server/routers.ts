@@ -12,8 +12,6 @@ import {
   getDaysRemaining,
   validateAccessCode,
   normalizeAccessCode,
-  shouldRotateCode,
-  getCodeRotationInfo,
 } from "./utils/accessCode.js";
 import { createPayment, getPaymentStatus } from "./services/yookassa.js";
 import nosologiesData from "../shared/nosologies.json" with { type: "json" };
@@ -97,49 +95,14 @@ export const appRouter = router({
         return null;
       }
 
-      // Check if code needs rotation
-      if (shouldRotateCode(subscription.codeGeneratedAt, subscription.expiresAt)) {
-        // Determine plan type by checking payment
-        const plan = subscription.paymentId ? 'monthly' : 'monthly';
-        const newCode = generateAccessCode(plan);
-        await db.rotateSubscriptionCode(subscription.id, newCode);
-        // Refetch after rotation
-        const updated = await db.getActiveSubscription(ctx.user.id);
-        if (!updated) return null;
-
-        const rotationInfo = getCodeRotationInfo(updated.codeGeneratedAt, updated.expiresAt);
-        return {
-          ...updated,
-          daysRemaining: getDaysRemaining(updated.expiresAt),
-          canCancelReveal: false,
-          accessCode: "****-****",
-          accessCodeMasked: true,
-          codeRotation: rotationInfo,
-        };
-      }
-
-      // Calculate if cancel is still possible (within 5 minutes of reveal)
-      let canCancelReveal = false;
-      if (subscription.codeRevealed === 1 && subscription.codeRevealedAt) {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        canCancelReveal = subscription.codeRevealedAt > fiveMinutesAgo;
-      }
-
-      const rotationInfo = getCodeRotationInfo(subscription.codeGeneratedAt, subscription.expiresAt);
-
       return {
         ...subscription,
         daysRemaining: getDaysRemaining(subscription.expiresAt),
-        canCancelReveal,
-        // Mask code if not revealed
-        accessCode:
-          subscription.codeRevealed === 1 ? subscription.accessCode : "****-****",
-        accessCodeMasked: subscription.codeRevealed !== 1,
-        codeRotation: rotationInfo,
+        accessCodeMasked: false,
       };
     }),
 
-    // Reveal the access code (one-time action)
+    // Reveal the access code
     revealCode: protectedProcedure.mutation(async ({ ctx }) => {
       const subscription = await db.getActiveSubscription(ctx.user.id);
 
@@ -147,41 +110,15 @@ export const appRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Подписка не найдена" });
       }
 
-      if (subscription.codeRevealed === 1) {
-        // Already revealed, just return the code
-        return {
-          accessCode: subscription.accessCode,
-          alreadyRevealed: true,
-        };
-      }
-
-      // Reveal the code
-      await db.revealAccessCode(subscription.id);
-
       return {
         accessCode: subscription.accessCode,
-        alreadyRevealed: false,
-        canCancelUntil: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        alreadyRevealed: true,
       };
     }),
 
-    // Cancel code reveal (within 5 minutes)
+    // Cancel code reveal (no-op for now)
     cancelReveal: protectedProcedure.mutation(async ({ ctx }) => {
-      const subscription = await db.getActiveSubscription(ctx.user.id);
-
-      if (!subscription) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Подписка не найдена" });
-      }
-
-      try {
-        await db.cancelCodeReveal(subscription.id);
-        return { success: true };
-      } catch (error) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: error instanceof Error ? error.message : "Не удалось отменить",
-        });
-      }
+      return { success: true };
     }),
 
     checkAccess: protectedProcedure

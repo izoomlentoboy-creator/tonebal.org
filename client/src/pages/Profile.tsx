@@ -109,15 +109,7 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    if (subscription?.canCancelReveal && subscription?.codeRevealedAt) {
-      const revealTime = new Date(subscription.codeRevealedAt).getTime();
-      const fiveMinutesLater = revealTime + 5 * 60 * 1000;
-      const now = Date.now();
-      const remaining = Math.max(0, Math.floor((fiveMinutesLater - now) / 1000));
-      if (remaining > 0) {
-        setCancelTimeLeft(remaining);
-      }
-    }
+    // Cancel reveal timer disabled until code_revealed columns are added
   }, [subscription]);
 
   useEffect(() => {
@@ -188,8 +180,8 @@ export default function Profile() {
 
   const hasSubscription = subscription && subscription.isActive === 1;
   const isCodeMasked = subscription?.accessCodeMasked;
-  const canCancel = subscription?.canCancelReveal && cancelTimeLeft && cancelTimeLeft > 0;
-  const codeRotation = subscription?.codeRotation;
+  const canCancel = false;
+  const codeRotation = null;
 
   return (
     <div className="min-h-screen bg-[#FDFBFF] font-sans">
@@ -364,34 +356,7 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Code Rotation Info */}
-                  {codeRotation && (
-                    <div className={`rounded-xl p-4 mb-4 ${
-                      codeRotation.showWarning1Day
-                        ? "bg-red-50 border border-red-200"
-                        : codeRotation.showWarning7Days
-                        ? "bg-amber-50 border border-amber-200"
-                        : "bg-slate-50 border border-slate-100"
-                    }`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <RefreshCw className={`h-4 w-4 ${
-                          codeRotation.showWarning1Day ? "text-red-500" : codeRotation.showWarning7Days ? "text-amber-500" : "text-slate-400"
-                        }`} />
-                        <span className={`text-sm font-medium ${
-                          codeRotation.showWarning1Day ? "text-red-800" : codeRotation.showWarning7Days ? "text-amber-800" : "text-slate-700"
-                        }`}>
-                          {codeRotation.showWarning1Day
-                            ? "Код обновится завтра!"
-                            : codeRotation.showWarning7Days
-                            ? `Код обновится через ${codeRotation.daysUntilRotation} дн.`
-                            : `Следующее обновление кода через ${codeRotation.daysUntilRotation} дн.`}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 ml-6">
-                        Код обновляется каждые 30 дней. После обновления введите новый код в iOS приложении.
-                      </p>
-                    </div>
-                  )}
+                  {/* Code Rotation Info (disabled until feature is implemented) */}
 
                   {/* Access Code Section */}
                   <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white mb-6">
@@ -486,7 +451,7 @@ export default function Profile() {
                               <div className="flex items-center gap-2 text-yellow-200">
                                 <Clock className="h-4 w-4" />
                                 <span className="text-sm">
-                                  Можно отменить: {formatTime(cancelTimeLeft)}
+                                  Можно отменить: {formatTime(cancelTimeLeft ?? 0)}
                                 </span>
                               </div>
                               <Button

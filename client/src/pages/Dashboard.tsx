@@ -94,10 +94,9 @@ export default function Dashboard() {
   const subscriptionExpired = subscription && subscription.isActive === 1 && subscription.daysRemaining <= 0;
   const hasDirections = directions && directions.length > 0;
 
-  // Code rotation warning
-  const codeRotation = subscription?.codeRotation;
-  const showCodeWarning7 = codeRotation?.showWarning7Days || false;
-  const showCodeWarning1 = codeRotation?.showWarning1Day || false;
+  // Code rotation warning (disabled until feature is implemented)
+  const showCodeWarning7 = false;
+  const showCodeWarning1 = false;
 
   const today = new Date();
   const monthNames = [
@@ -234,7 +233,7 @@ export default function Dashboard() {
                 <p className="text-sm font-medium">
                   {showCodeWarning1
                     ? "Код доступа обновится завтра!"
-                    : `Код доступа обновится через ${codeRotation?.daysUntilRotation} дн.`}
+                    : "Код доступа скоро обновится"}
                 </p>
                 <p className="text-xs opacity-70 mt-0.5">
                   После обновления нужно будет ввести новый код в iOS приложении
