@@ -14,7 +14,6 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("login_method", { length: 64 }),
   role: roleEnum("role").default("user").notNull(),
-  timezone: varchar("timezone", { length: 64 }).default("Europe/Moscow"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastSignedIn: timestamp("last_signed_in").defaultNow().notNull(),

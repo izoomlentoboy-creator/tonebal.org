@@ -1,5 +1,5 @@
 {
-  "id": "fbc2701b-fc48-4cc6-a300-b7baebfb01f9",
+  "id": "8aac81ad-9c4f-419f-909b-7601472697ec",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -332,13 +332,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'user'"
-        },
-        "timezone": {
-          "name": "timezone",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'Europe/Moscow'"
         },
         "created_at": {
           "name": "created_at",

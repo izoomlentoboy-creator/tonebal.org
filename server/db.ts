@@ -522,15 +522,9 @@ function getTimezoneOffsetMinutes(timezone: string, date: Date): number {
   return (utcDate.getTime() - tzDate.getTime()) / (60 * 1000);
 }
 
-// Update user timezone
-export async function updateUserTimezone(userId: number, timezone: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  await db
-    .update(users)
-    .set({ timezone, updatedAt: new Date() })
-    .where(eq(users.id, userId));
+// Update user timezone (currently a no-op: timezone column not yet in DB)
+export async function updateUserTimezone(_userId: number, _timezone: string) {
+  // TODO: add timezone column to users table via migration, then enable this
 }
 
 // Get user's activity streak (consecutive days)
