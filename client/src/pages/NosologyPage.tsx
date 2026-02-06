@@ -5,6 +5,16 @@ import { ArrowLeft, CheckCircle2, Circle, Clock, Lock, BookOpen, Play } from "lu
 import { Link, useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
 
+// Calculate days remaining using user's local timezone
+const getLocalDaysRemaining = (expiresAt: string | Date): number => {
+  const now = new Date();
+  const expiry = new Date(expiresAt);
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const expiryDate = new Date(expiry.getFullYear(), expiry.getMonth(), expiry.getDate());
+  const diffDays = Math.round((expiryDate.getTime() - nowDate.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
+
 export default function NosologyPage() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
@@ -35,11 +45,12 @@ export default function NosologyPage() {
   }
 
   // Проверяем активность подписки: isActive и daysRemaining > 0
-  const hasSubscription = subscription && subscription.isActive === 1 && subscription.daysRemaining > 0;
+  const localDaysRemaining = subscription ? getLocalDaysRemaining(subscription.expiresAt) : 0;
+  const hasSubscription = subscription && subscription.isActive === 1 && localDaysRemaining > 0;
   const hasAccess = nosology.isFree || hasSubscription;
 
   // Проверяем, истекла ли подписка (была активная, но дней не осталось)
-  const subscriptionExpired = subscription && subscription.isActive === 1 && subscription.daysRemaining <= 0;
+  const subscriptionExpired = subscription && subscription.isActive === 1 && localDaysRemaining <= 0;
 
   if (!hasAccess) {
     return (

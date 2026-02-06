@@ -1,6 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
 import { EncouragementPopup, useEncouragement } from "@/components/EncouragementPopup";
 import { trpc } from "@/lib/trpc";
 import {
@@ -29,6 +28,16 @@ import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Calculate days remaining using user's local timezone
+const getLocalDaysRemaining = (expiresAt: string | Date): number => {
+  const now = new Date();
+  const expiry = new Date(expiresAt);
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const expiryDate = new Date(expiry.getFullYear(), expiry.getMonth(), expiry.getDate());
+  const diffDays = Math.round((expiryDate.getTime() - nowDate.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
 
 // Helper to get days in month
 const getDaysInMonth = (year: number, month: number) => {
@@ -90,8 +99,9 @@ export default function Dashboard() {
     );
   }
 
-  const hasSubscription = subscription && subscription.isActive === 1 && subscription.daysRemaining > 0;
-  const subscriptionExpired = subscription && subscription.isActive === 1 && subscription.daysRemaining <= 0;
+  const localDaysRemaining = subscription ? getLocalDaysRemaining(subscription.expiresAt) : 0;
+  const hasSubscription = subscription && subscription.isActive === 1 && localDaysRemaining > 0;
+  const subscriptionExpired = subscription && subscription.isActive === 1 && localDaysRemaining <= 0;
   const hasDirections = directions && directions.length > 0;
 
   // Code rotation warning (disabled until feature is implemented)
@@ -469,7 +479,7 @@ function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Подписка</p>
-              <p className="text-2xl font-bold text-slate-900">{subscription.daysRemaining} дн.</p>
+              <p className="text-2xl font-bold text-slate-900">{getLocalDaysRemaining(subscription.expiresAt)} дн.</p>
               <p className="text-xs text-slate-500">до истечения</p>
             </div>
             <Button variant="outline" className="rounded-xl" asChild>
@@ -556,7 +566,7 @@ function DirectionSelector({ nosologies, compact }: { nosologies: any; compact?:
   const { data: directions } = trpc.direction.getMy.useQuery();
   const { data: subscription } = trpc.subscription.getMy.useQuery();
 
-  const hasSubscription = subscription && subscription.isActive === 1 && subscription.daysRemaining > 0;
+  const hasSubscription = subscription && subscription.isActive === 1 && getLocalDaysRemaining(subscription.expiresAt) > 0;
 
   const setDirectionsMutation = trpc.direction.setMy.useMutation({
     onSuccess: () => {
