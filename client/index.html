@@ -22,6 +22,19 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      window.addEventListener('error', function(e) {
+        document.getElementById('root').innerHTML =
+          '<pre style="padding:20px;color:red;font-size:14px;">ERROR: ' +
+          e.message + '\n' + (e.filename || '') + ':' + (e.lineno || '') +
+          '</pre>';
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        document.getElementById('root').innerHTML =
+          '<pre style="padding:20px;color:red;font-size:14px;">PROMISE ERROR: ' +
+          (e.reason ? (e.reason.message || e.reason) : 'unknown') + '</pre>';
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <script>
       (function() {
