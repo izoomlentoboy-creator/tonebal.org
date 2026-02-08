@@ -1,23 +1,29 @@
-import nodemailer from "nodemailer";
 import { ENV } from "../_core/env.js";
 
-const smtpPort = parseInt(process.env.SMTP_PORT || "465");
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.yandex.ru",
-  port: smtpPort,
-  secure: smtpPort === 465,
-  auth: {
-    user: process.env.SMTP_USER || "",
-    pass: process.env.SMTP_PASS || "",
-  },
-  connectionTimeout: 10_000,
-  greetingTimeout: 10_000,
-  socketTimeout: 15_000,
-});
-
-const FROM_EMAIL = process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@tonebal.org";
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+const FROM_EMAIL = process.env.EMAIL_FROM || "onboarding@resend.dev";
 const FROM_NAME = "ToneBalance";
+
+async function sendMail(opts: { to: string; subject: string; html: string }) {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: [opts.to],
+      subject: opts.subject,
+      html: opts.html,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Resend API error ${res.status}: ${body}`);
+  }
+}
 
 // ─── Base email template ───────────────────────────────────────────────────────
 
@@ -108,8 +114,7 @@ export async function sendVerificationCode(email: string, code: string) {
       </tr>
     </table>`;
 
-  await transporter.sendMail({
-    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+  await sendMail({
     to: email,
     subject: `${code} — код подтверждения ToneBalance`,
     html: emailLayout(content),
@@ -175,8 +180,7 @@ export async function sendWelcomeEmail(email: string, name: string | null) {
       </tr>
     </table>`;
 
-  await transporter.sendMail({
-    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+  await sendMail({
     to: email,
     subject: "Добро пожаловать в ToneBalance!",
     html: emailLayout(content),
@@ -219,8 +223,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
       </tr>
     </table>`;
 
-  await transporter.sendMail({
-    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+  await sendMail({
     to: email,
     subject: "Сброс пароля — ToneBalance",
     html: emailLayout(content),
@@ -293,8 +296,7 @@ export async function sendSubscriptionExpiryReminder(
       </tr>
     </table>`;
 
-  await transporter.sendMail({
-    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+  await sendMail({
     to: email,
     subject: `Подписка истекает через ${daysRemaining} ${daysWord} — ToneBalance`,
     html: emailLayout(content),
