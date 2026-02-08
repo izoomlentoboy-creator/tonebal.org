@@ -7,6 +7,7 @@ import { appRouter } from "../server/routers.js";
 import { createContext } from "../server/_core/context.js";
 import * as db from "../server/db.js";
 import { validateAccessCode, normalizeAccessCode, getDaysRemaining } from "../server/utils/accessCode.js";
+import { processSubscriptionReminders } from "../server/utils/subscription-reminders.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -70,6 +71,22 @@ app.post("/api/activate-code", async (req, res) => {
       success: false,
       error: "Server error",
     });
+  }
+});
+
+// Cron endpoint for subscription reminders
+app.post("/api/cron/subscription-reminders", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const result = await processSubscriptionReminders();
+    res.json(result);
+  } catch (error) {
+    console.error("[Cron] Subscription reminders error:", error);
+    res.status(500).json({ error: "Failed to process reminders" });
   }
 });
 

@@ -5,25 +5,85 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import * as db from "../db.js";
 import { getSessionCookieOptions } from "./cookies.js";
 import { sdk } from "./sdk.js";
-import { ENV } from "./env.js";
-import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/email.js";
+import { sendVerificationCode, sendWelcomeEmail, sendPasswordResetEmail } from "../utils/email.js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
 const BCRYPT_ROUNDS = 10;
+const CODE_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
+const CODE_COOLDOWN_MS = 60 * 1000; // 1 minute between resends
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
+function generateCode(): string {
+  return crypto.randomInt(100000, 999999).toString();
+}
+
 export function registerEmailAuthRoutes(app: Express) {
-  // Registration
+  // Step 1: Send verification code to email
+  app.post("/api/auth/email/send-code", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: "Email обязателен" });
+      }
+
+      if (!EMAIL_REGEX.test(email)) {
+        return res.status(400).json({ error: "Некорректный email" });
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+
+      // Check if user already exists
+      const existing = await db.getUserByEmail(normalizedEmail);
+      if (existing) {
+        return res.status(409).json({ error: "Пользователь с этим email уже существует" });
+      }
+
+      // Check cooldown — don't spam codes
+      const recentCode = await db.getVerificationCode(normalizedEmail);
+      if (recentCode) {
+        const elapsed = Date.now() - new Date(recentCode.createdAt).getTime();
+        if (elapsed < CODE_COOLDOWN_MS) {
+          const waitSeconds = Math.ceil((CODE_COOLDOWN_MS - elapsed) / 1000);
+          return res.status(429).json({ error: `Подождите ${waitSeconds} сек. перед повторной отправкой` });
+        }
+      }
+
+      const code = generateCode();
+      const token = `code_${code}_${crypto.randomBytes(8).toString("hex")}`;
+
+      await db.createEmailToken({
+        email: normalizedEmail,
+        token,
+        type: "verify_code",
+        expiresAt: new Date(Date.now() + CODE_EXPIRY_MS),
+      });
+
+      try {
+        await sendVerificationCode(normalizedEmail, code);
+      } catch (emailErr) {
+        console.error("[Email Auth] Failed to send verification code:", emailErr);
+        return res.status(500).json({ error: "Не удалось отправить письмо. Проверьте email и попробуйте снова." });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("[Email Auth] Send code error:", error);
+      res.status(500).json({ error: "Ошибка сервера" });
+    }
+  });
+
+  // Step 2: Register with verified code
   app.post("/api/auth/email/register", async (req: Request, res: Response) => {
     try {
-      const { email, password, name } = req.body;
+      const { email, password, name, code, emailConsent } = req.body;
 
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email и пароль обязательны" });
+      if (!email || !password || !code) {
+        return res.status(400).json({ error: "Email, пароль и код подтверждения обязательны" });
       }
 
       if (!EMAIL_REGEX.test(email)) {
@@ -36,16 +96,36 @@ export function registerEmailAuthRoutes(app: Express) {
 
       const normalizedEmail = email.toLowerCase().trim();
 
-      // Check if user with this email already exists
+      // Verify the code
+      const emailToken = await db.getVerificationCode(normalizedEmail);
+
+      if (!emailToken) {
+        return res.status(400).json({ error: "Код не найден. Запросите новый код." });
+      }
+
+      if (new Date() > new Date(emailToken.expiresAt)) {
+        return res.status(400).json({ error: "Код истёк. Запросите новый код." });
+      }
+
+      // Extract 6-digit code from token field (format: code_XXXXXX_random)
+      const storedCode = emailToken.token.split("_")[1];
+      if (storedCode !== code) {
+        return res.status(400).json({ error: "Неверный код подтверждения" });
+      }
+
+      // Check if user already exists (race condition protection)
       const existing = await db.getUserByEmail(normalizedEmail);
       if (existing) {
         return res.status(409).json({ error: "Пользователь с этим email уже существует" });
       }
 
+      // Mark code as used
+      await db.markEmailTokenUsed(emailToken.id);
+
       // Hash password
       const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
-      // Create user with openId = "email_<random>"
+      // Create user
       const openId = `email_${crypto.randomUUID()}`;
 
       await db.upsertUser({
@@ -53,29 +133,13 @@ export function registerEmailAuthRoutes(app: Express) {
         name: name || null,
         email: normalizedEmail,
         passwordHash,
+        emailVerified: true,
+        emailConsent: emailConsent === true,
         loginMethod: "email",
         lastSignedIn: new Date(),
       });
 
-      // Create email verification token
-      const token = generateToken();
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-      await db.createEmailToken({
-        userId: (await db.getUserByOpenId(openId))!.id,
-        token,
-        type: "verify",
-        expiresAt,
-      });
-
-      // Send verification email
-      try {
-        await sendVerificationEmail(normalizedEmail, token);
-      } catch (emailErr) {
-        console.warn("[Email Auth] Failed to send verification email:", emailErr);
-      }
-
-      // Create session immediately (user can use app before verifying)
+      // Create session
       const sessionToken = await sdk.createSessionToken(openId, {
         name: name || "",
         expiresInMs: ONE_YEAR_MS,
@@ -84,7 +148,12 @@ export function registerEmailAuthRoutes(app: Express) {
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
-      res.json({ success: true, emailVerified: false });
+      // Send welcome email (non-blocking)
+      sendWelcomeEmail(normalizedEmail, name || null).catch(err => {
+        console.warn("[Email Auth] Failed to send welcome email:", err);
+      });
+
+      res.json({ success: true });
     } catch (error) {
       console.error("[Email Auth] Register error:", error);
       res.status(500).json({ error: "Ошибка сервера" });
@@ -112,13 +181,11 @@ export function registerEmailAuthRoutes(app: Express) {
         return res.status(401).json({ error: "Неверный email или пароль" });
       }
 
-      // Update last sign in
       await db.upsertUser({
         openId: user.openId,
         lastSignedIn: new Date(),
       });
 
-      // Create session
       const sessionToken = await sdk.createSessionToken(user.openId, {
         name: user.name || "",
         expiresInMs: ONE_YEAR_MS,
@@ -134,33 +201,21 @@ export function registerEmailAuthRoutes(app: Express) {
     }
   });
 
-  // Email verification
+  // Email verification (legacy link-based)
   app.get("/api/auth/email/verify", async (req: Request, res: Response) => {
     try {
       const token = req.query.token as string;
-
-      if (!token) {
-        return res.redirect("/login?error=invalid_token");
-      }
+      if (!token) return res.redirect("/login?error=invalid_token");
 
       const emailToken = await db.getEmailToken(token, "verify");
+      if (!emailToken) return res.redirect("/login?error=invalid_token");
+      if (new Date() > new Date(emailToken.expiresAt)) return res.redirect("/login?error=token_expired");
+      if (emailToken.usedAt) return res.redirect("/login?error=token_used");
 
-      if (!emailToken) {
-        return res.redirect("/login?error=invalid_token");
+      if (emailToken.userId) {
+        await db.markEmailVerified(emailToken.userId);
       }
-
-      if (new Date() > new Date(emailToken.expiresAt)) {
-        return res.redirect("/login?error=token_expired");
-      }
-
-      if (emailToken.usedAt) {
-        return res.redirect("/login?error=token_used");
-      }
-
-      // Mark email as verified
-      await db.markEmailVerified(emailToken.userId);
       await db.markEmailTokenUsed(emailToken.id);
-
       res.redirect("/dashboard?verified=true");
     } catch (error) {
       console.error("[Email Auth] Verify error:", error);
@@ -168,69 +223,21 @@ export function registerEmailAuthRoutes(app: Express) {
     }
   });
 
-  // Resend verification email
-  app.post("/api/auth/email/resend-verify", async (req: Request, res: Response) => {
-    try {
-      const { email } = req.body;
-
-      if (!email) {
-        return res.status(400).json({ error: "Email обязателен" });
-      }
-
-      const normalizedEmail = email.toLowerCase().trim();
-      const user = await db.getUserByEmail(normalizedEmail);
-
-      if (!user) {
-        // Don't reveal if user exists
-        return res.json({ success: true });
-      }
-
-      if (user.emailVerified) {
-        return res.json({ success: true, alreadyVerified: true });
-      }
-
-      const token = generateToken();
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-      await db.createEmailToken({
-        userId: user.id,
-        token,
-        type: "verify",
-        expiresAt,
-      });
-
-      try {
-        await sendVerificationEmail(normalizedEmail, token);
-      } catch (emailErr) {
-        console.warn("[Email Auth] Failed to resend verification:", emailErr);
-      }
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error("[Email Auth] Resend verify error:", error);
-      res.status(500).json({ error: "Ошибка сервера" });
-    }
-  });
-
-  // Forgot password - send reset email
+  // Forgot password
   app.post("/api/auth/email/forgot-password", async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
-
-      if (!email) {
-        return res.status(400).json({ error: "Email обязателен" });
-      }
+      if (!email) return res.status(400).json({ error: "Email обязателен" });
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await db.getUserByEmail(normalizedEmail);
 
-      // Always return success (don't reveal if user exists)
       if (!user || !user.passwordHash) {
         return res.json({ success: true });
       }
 
       const token = generateToken();
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
       await db.createEmailToken({
         userId: user.id,
@@ -266,21 +273,12 @@ export function registerEmailAuthRoutes(app: Express) {
       }
 
       const emailToken = await db.getEmailToken(token, "reset");
-
-      if (!emailToken) {
-        return res.status(400).json({ error: "Неверная или истекшая ссылка" });
-      }
-
-      if (new Date() > new Date(emailToken.expiresAt)) {
-        return res.status(400).json({ error: "Ссылка для сброса истекла" });
-      }
-
-      if (emailToken.usedAt) {
-        return res.status(400).json({ error: "Ссылка уже использована" });
-      }
+      if (!emailToken) return res.status(400).json({ error: "Неверная или истекшая ссылка" });
+      if (new Date() > new Date(emailToken.expiresAt)) return res.status(400).json({ error: "Ссылка для сброса истекла" });
+      if (emailToken.usedAt) return res.status(400).json({ error: "Ссылка уже использована" });
+      if (!emailToken.userId) return res.status(400).json({ error: "Неверная ссылка" });
 
       const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-
       await db.updateUserPassword(emailToken.userId, passwordHash);
       await db.markEmailTokenUsed(emailToken.id);
 
