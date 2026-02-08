@@ -1,14 +1,19 @@
 import nodemailer from "nodemailer";
 import { ENV } from "../_core/env.js";
 
+const smtpPort = parseInt(process.env.SMTP_PORT || "465");
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.yandex.ru",
-  port: parseInt(process.env.SMTP_PORT || "465"),
-  secure: true,
+  port: smtpPort,
+  secure: smtpPort === 465,
   auth: {
     user: process.env.SMTP_USER || "",
     pass: process.env.SMTP_PASS || "",
   },
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 15_000,
 });
 
 const FROM_EMAIL = process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@tonebal.org";
