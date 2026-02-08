@@ -14,6 +14,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 320 }),
   passwordHash: text("password_hash"),
   emailVerified: boolean("email_verified").default(false).notNull(),
+  emailConsent: boolean("email_consent").default(false).notNull(),
   loginMethod: varchar("login_method", { length: 64 }),
   role: roleEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -26,9 +27,10 @@ export const users = pgTable("users", {
  */
 export const emailTokens = pgTable("email_tokens", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id"),
+  email: varchar("email", { length: 320 }),
   token: varchar("token", { length: 64 }).notNull().unique(),
-  type: varchar("type", { length: 20 }).notNull(), // "verify" | "reset"
+  type: varchar("type", { length: 20 }).notNull(), // "verify_code" | "verify" | "reset"
   expiresAt: timestamp("expires_at").notNull(),
   usedAt: timestamp("used_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -51,6 +53,8 @@ export const subscriptions = pgTable("subscriptions", {
   accessCode: varchar("access_code", { length: 8 }).notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   isActive: integer("is_active").default(1).notNull(),
+  reminder7dSentAt: timestamp("reminder_7d_sent_at"),
+  reminder1dSentAt: timestamp("reminder_1d_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

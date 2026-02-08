@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import {
@@ -545,6 +545,85 @@ export async function updateUserPassword(userId: number, passwordHash: string) {
     .update(users)
     .set({ passwordHash, updatedAt: new Date() })
     .where(eq(users.id, userId));
+}
+
+export async function updateEmailConsent(userId: number, consent: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(users)
+    .set({ emailConsent: consent, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+export async function getVerificationCode(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(emailTokens)
+    .where(
+      and(
+        eq(emailTokens.email, email),
+        eq(emailTokens.type, "verify_code"),
+        sql`${emailTokens.usedAt} IS NULL`
+      )
+    )
+    .orderBy(desc(emailTokens.createdAt))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Subscription reminder queries
+export async function getExpiringSubscriptions(targetDays: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const now = new Date();
+  const targetDate = new Date(now.getTime() + targetDays * 24 * 60 * 60 * 1000);
+  const windowStart = new Date(targetDate.getTime() - 12 * 60 * 60 * 1000);
+  const windowEnd = new Date(targetDate.getTime() + 12 * 60 * 60 * 1000);
+
+  const reminderColumn = targetDays <= 3
+    ? subscriptions.reminder1dSentAt
+    : subscriptions.reminder7dSentAt;
+
+  const result = await db
+    .select({
+      subscription: subscriptions,
+      user: users,
+    })
+    .from(subscriptions)
+    .innerJoin(users, eq(subscriptions.userId, users.id))
+    .where(
+      and(
+        eq(subscriptions.isActive, 1),
+        gte(subscriptions.expiresAt, windowStart),
+        lte(subscriptions.expiresAt, windowEnd),
+        eq(users.emailConsent, true),
+        sql`${users.email} IS NOT NULL`,
+        isNull(reminderColumn)
+      )
+    );
+
+  return result;
+}
+
+export async function markReminderSent(subscriptionId: number, type: "7d" | "1d") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const field = type === "7d"
+    ? { reminder7dSentAt: new Date() }
+    : { reminder1dSentAt: new Date() };
+
+  await db
+    .update(subscriptions)
+    .set({ ...field, updatedAt: new Date() })
+    .where(eq(subscriptions.id, subscriptionId));
 }
 
 // Get user's activity streak (consecutive days)

@@ -10,6 +10,7 @@ import { createContext } from "./context.js";
 import { serveStatic, setupVite } from "./vite.js";
 import * as db from "../db.js";
 import { validateAccessCode, normalizeAccessCode, getDaysRemaining } from "../utils/accessCode.js";
+import { processSubscriptionReminders } from "../utils/subscription-reminders.js";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -125,9 +126,37 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
+  // Cron endpoint for subscription reminders (can also be called externally)
+  app.post("/api/cron/subscription-reminders", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const result = await processSubscriptionReminders();
+      res.json(result);
+    } catch (error) {
+      console.error("[Cron] Subscription reminders error:", error);
+      res.status(500).json({ error: "Failed to process reminders" });
+    }
+  });
+
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  // Run subscription reminders daily (for VPS deployment with PM2)
+  if (process.env.NODE_ENV === "production") {
+    const DAILY_MS = 24 * 60 * 60 * 1000;
+    // Run first check 1 minute after startup, then every 24 hours
+    setTimeout(() => {
+      processSubscriptionReminders().catch(console.error);
+      setInterval(() => {
+        processSubscriptionReminders().catch(console.error);
+      }, DAILY_MS);
+    }, 60_000);
+  }
 }
 
 startServer().catch(console.error);

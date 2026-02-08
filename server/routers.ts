@@ -49,6 +49,15 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+    getEmailConsent: protectedProcedure.query(async ({ ctx }) => {
+      return { emailConsent: ctx.user.emailConsent ?? false };
+    }),
+    setEmailConsent: protectedProcedure
+      .input(z.object({ consent: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateEmailConsent(ctx.user.id, input.consent);
+        return { success: true };
+      }),
   }),
 
   // Nosologies

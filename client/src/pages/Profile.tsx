@@ -32,6 +32,7 @@ import {
   RefreshCw,
   Compass,
   CheckCircle2,
+  Bell,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -61,6 +62,14 @@ export default function Profile() {
   const { data: subscription } = trpc.subscription.getMy.useQuery();
   const { data: nosologies } = trpc.nosologies.getAll.useQuery();
   const { data: directions } = trpc.direction.getMy.useQuery();
+  const { data: emailConsentData } = trpc.auth.getEmailConsent.useQuery();
+
+  const setEmailConsentMutation = trpc.auth.setEmailConsent.useMutation({
+    onSuccess: () => {
+      utils.auth.getEmailConsent.invalidate();
+      toast.success("Настройки уведомлений обновлены");
+    },
+  });
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -564,6 +573,47 @@ export default function Profile() {
                 Скачать из App Store
               </Button>
             </motion.div>
+
+            {/* Email Notifications */}
+            {user?.email && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.35 }}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"
+              >
+                <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-[#7C3AED]" />
+                  Уведомления по email
+                </h2>
+                <label className="flex items-center justify-between cursor-pointer group p-3 bg-slate-50 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                      <Mail className="h-5 w-5 text-[#7C3AED]" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900 text-sm">Рассылка уведомлений</p>
+                      <p className="text-xs text-slate-500">Напоминания об истечении подписки и обновления</p>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={emailConsentData?.emailConsent ?? false}
+                      onChange={e => setEmailConsentMutation.mutate({ consent: e.target.checked })}
+                      className="sr-only"
+                    />
+                    <div className={`w-11 h-6 rounded-full transition-colors ${
+                      emailConsentData?.emailConsent ? "bg-[#7C3AED]" : "bg-slate-300"
+                    }`}>
+                      <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform mt-0.5 ${
+                        emailConsentData?.emailConsent ? "translate-x-[22px]" : "translate-x-0.5"
+                      }`} />
+                    </div>
+                  </div>
+                </label>
+              </motion.div>
+            )}
 
             {/* Account Actions */}
             <motion.div
