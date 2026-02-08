@@ -1,4 +1,4 @@
-import { integer, pgEnum, pgTable, serial, text, timestamp, varchar, unique } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, serial, text, timestamp, varchar, unique, boolean } from "drizzle-orm/pg-core";
 
 /**
  * Core user table backing auth flow.
@@ -12,12 +12,30 @@ export const users = pgTable("users", {
   openId: varchar("open_id", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
+  passwordHash: text("password_hash"),
+  emailVerified: boolean("email_verified").default(false).notNull(),
   loginMethod: varchar("login_method", { length: 64 }),
   role: roleEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastSignedIn: timestamp("last_signed_in").defaultNow().notNull(),
 });
+
+/**
+ * Email verification and password reset tokens
+ */
+export const emailTokens = pgTable("email_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  token: varchar("token", { length: 64 }).notNull().unique(),
+  type: varchar("type", { length: 20 }).notNull(), // "verify" | "reset"
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type EmailToken = typeof emailTokens.$inferSelect;
+export type InsertEmailToken = typeof emailTokens.$inferInsert;
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;

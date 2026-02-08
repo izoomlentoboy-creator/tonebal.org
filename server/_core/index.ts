@@ -4,6 +4,7 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth.js";
+import { registerEmailAuthRoutes } from "./email-auth.js";
 import { appRouter } from "../routers.js";
 import { createContext } from "./context.js";
 import { serveStatic, setupVite } from "./vite.js";
@@ -38,6 +39,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  registerEmailAuthRoutes(app);
 
   // REST API endpoint for iOS code activation
   app.post("/api/activate-code", async (req, res) => {
