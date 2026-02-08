@@ -13,7 +13,9 @@ import {
   voiceRatings,
   InsertVoiceRating,
   userDirections,
-  InsertUserDirection
+  InsertUserDirection,
+  emailTokens,
+  InsertEmailToken,
 } from "../drizzle/schema.js";
 import { ENV } from './_core/env.js';
 
@@ -54,6 +56,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
       if (user.name !== undefined) updateSet.name = user.name;
       if (user.email !== undefined) updateSet.email = user.email;
+      if (user.passwordHash !== undefined) updateSet.passwordHash = user.passwordHash;
       if (user.loginMethod !== undefined) updateSet.loginMethod = user.loginMethod;
       if (user.lastSignedIn !== undefined) updateSet.lastSignedIn = user.lastSignedIn;
       if (user.role !== undefined) updateSet.role = user.role;
@@ -67,6 +70,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
         openId: user.openId,
         name: user.name ?? null,
         email: user.email ?? null,
+        passwordHash: user.passwordHash ?? null,
         loginMethod: user.loginMethod ?? null,
         lastSignedIn: user.lastSignedIn ?? new Date(),
         role: user.role ?? (user.openId === ENV.ownerOpenId ? 'admin' : 'user'),
@@ -482,6 +486,65 @@ function getTimezoneOffsetMinutes(timezone: string, date: Date): number {
 // Update user timezone (currently a no-op: timezone column not yet in DB)
 export async function updateUserTimezone(_userId: number, _timezone: string) {
   // TODO: add timezone column to users table via migration, then enable this
+}
+
+// Email auth functions
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createEmailToken(data: InsertEmailToken) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(emailTokens).values(data);
+}
+
+export async function getEmailToken(token: string, type: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(emailTokens)
+    .where(and(eq(emailTokens.token, token), eq(emailTokens.type, type)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function markEmailVerified(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(users)
+    .set({ emailVerified: true, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+export async function markEmailTokenUsed(tokenId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(emailTokens)
+    .set({ usedAt: new Date() })
+    .where(eq(emailTokens.id, tokenId));
+}
+
+export async function updateUserPassword(userId: number, passwordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(users)
+    .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(users.id, userId));
 }
 
 // Get user's activity streak (consecutive days)

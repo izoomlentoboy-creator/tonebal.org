@@ -1,15 +1,37 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { VKSignInButton } from "@/components/VKSignInButton";
 import { ToneBalanceLogo } from "@/components/ToneBalanceLogo";
-import { Shield, CheckCircle2, ArrowLeft } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Shield, CheckCircle2, ArrowLeft, Mail, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Link, useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+
+type AuthMode = "login" | "register" | "forgot-password" | "reset-password";
 
 export default function Login() {
   const { isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
+  const params = new URLSearchParams(searchString);
 
-  // Если пользователь уже авторизован, редиректим на dashboard
+  const initialMode = (params.get("mode") as AuthMode) || "login";
+  const resetToken = params.get("token") || "";
+
+  const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (params.get("mode") === "reset-password") {
+      setMode("reset-password");
+    }
+  }, []);
+
   if (!loading && isAuthenticated) {
     setLocation("/dashboard");
     return null;
@@ -22,6 +44,91 @@ export default function Login() {
       </div>
     );
   }
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
+
+    try {
+      if (mode === "register") {
+        const res = await fetch("/api/auth/email/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, name }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Ошибка регистрации");
+          return;
+        }
+        window.location.href = "/dashboard";
+      } else if (mode === "login") {
+        const res = await fetch("/api/auth/email/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Ошибка входа");
+          return;
+        }
+        window.location.href = "/dashboard";
+      } else if (mode === "forgot-password") {
+        const res = await fetch("/api/auth/email/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Ошибка");
+          return;
+        }
+        setSuccess("Ссылка для сброса пароля отправлена на email");
+      } else if (mode === "reset-password") {
+        const res = await fetch("/api/auth/email/reset-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: resetToken, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Ошибка сброса пароля");
+          return;
+        }
+        setSuccess("Пароль успешно изменён");
+        setTimeout(() => {
+          setMode("login");
+          setSuccess("");
+        }, 2000);
+      }
+    } catch {
+      setError("Ошибка сети. Попробуйте позже.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case "register": return "Регистрация";
+      case "forgot-password": return "Восстановление пароля";
+      case "reset-password": return "Новый пароль";
+      default: return "Вход в ToneBalance";
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (mode) {
+      case "register": return "Создайте аккаунт для доступа к программам";
+      case "forgot-password": return "Введите email, и мы отправим ссылку для сброса пароля";
+      case "reset-password": return "Придумайте новый пароль";
+      default: return "Войдите для доступа к программам голосовой реабилитации";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 flex flex-col">
@@ -81,24 +188,151 @@ export default function Login() {
 
             {/* Title */}
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-slate-800 mb-2">Вход в ToneBalance</h1>
-              <p className="text-slate-500">
-                Войдите через VK для доступа к программам голосовой реабилитации
-              </p>
+              <h1 className="text-2xl font-bold text-slate-800 mb-2">{getTitle()}</h1>
+              <p className="text-slate-500">{getSubtitle()}</p>
             </div>
 
-            {/* VK Sign In */}
-            <div className="mb-8">
-              <VKSignInButton className="w-full flex justify-center" />
+            {/* VK Sign In - only on login/register */}
+            {(mode === "login" || mode === "register") && (
+              <>
+                <div className="mb-6">
+                  <VKSignInButton className="w-full flex justify-center" />
+                </div>
+
+                {/* Divider */}
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-white/80 px-3 text-slate-400">или по email</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Error / Success messages */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-600">
+                {success}
+              </div>
+            )}
+
+            {/* Email Form */}
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              {mode === "register" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Имя</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Ваше имя"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition-all"
+                  />
+                </div>
+              )}
+
+              {mode !== "reset-password" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="example@mail.ru"
+                      required
+                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {mode !== "forgot-password" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Пароль</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder={mode === "reset-password" ? "Новый пароль" : "Минимум 6 символов"}
+                      required
+                      minLength={6}
+                      className="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-medium hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {mode === "login" && "Войти"}
+                {mode === "register" && "Зарегистрироваться"}
+                {mode === "forgot-password" && "Отправить ссылку"}
+                {mode === "reset-password" && "Сохранить пароль"}
+              </button>
+            </form>
+
+            {/* Mode switching links */}
+            <div className="mt-6 text-center text-sm text-slate-500 space-y-2">
+              {mode === "login" && (
+                <>
+                  <p>
+                    Нет аккаунта?{" "}
+                    <button onClick={() => { setMode("register"); setError(""); setSuccess(""); }} className="text-violet-600 hover:underline font-medium">
+                      Зарегистрироваться
+                    </button>
+                  </p>
+                  <p>
+                    <button onClick={() => { setMode("forgot-password"); setError(""); setSuccess(""); }} className="text-violet-600 hover:underline">
+                      Забыли пароль?
+                    </button>
+                  </p>
+                </>
+              )}
+              {mode === "register" && (
+                <p>
+                  Уже есть аккаунт?{" "}
+                  <button onClick={() => { setMode("login"); setError(""); setSuccess(""); }} className="text-violet-600 hover:underline font-medium">
+                    Войти
+                  </button>
+                </p>
+              )}
+              {(mode === "forgot-password" || mode === "reset-password") && (
+                <p>
+                  <button onClick={() => { setMode("login"); setError(""); setSuccess(""); }} className="text-violet-600 hover:underline">
+                    Вернуться ко входу
+                  </button>
+                </p>
+              )}
             </div>
 
             {/* Security info */}
-            <div className="space-y-4 pt-6 border-t border-slate-100">
+            <div className="space-y-4 pt-6 border-t border-slate-100 mt-6">
               <div className="flex items-start gap-3 text-sm text-slate-500">
                 <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
                   <Shield className="h-4 w-4 text-violet-600" />
                 </div>
-                <span>Мы не храним ваш пароль — авторизация происходит через VK</span>
+                <span>Пароль хранится в зашифрованном виде — мы не можем его увидеть</span>
               </div>
               <div className="flex items-start gap-3 text-sm text-slate-500">
                 <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
@@ -122,34 +356,36 @@ export default function Login() {
           </motion.div>
 
           {/* Benefits Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-violet-500/10 border border-white/50 p-6"
-          >
-            <h3 className="font-semibold text-slate-800 mb-4">После входа вам будет доступно:</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-3 text-sm text-slate-600">
-                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                </div>
-                Бесплатные программы: Введение и Дыхательная гимнастика
-              </li>
-              <li className="flex items-center gap-3 text-sm text-slate-600">
-                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                </div>
-                Отслеживание вашего прогресса
-              </li>
-              <li className="flex items-center gap-3 text-sm text-slate-600">
-                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                </div>
-                Синхронизация с мобильным приложением
-              </li>
-            </ul>
-          </motion.div>
+          {(mode === "login" || mode === "register") && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-violet-500/10 border border-white/50 p-6"
+            >
+              <h3 className="font-semibold text-slate-800 mb-4">После входа вам будет доступно:</h3>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm text-slate-600">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  </div>
+                  Бесплатные программы: Введение и Дыхательная гимнастика
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-600">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  </div>
+                  Отслеживание вашего прогресса
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-600">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  </div>
+                  Синхронизация с мобильным приложением
+                </li>
+              </ul>
+            </motion.div>
+          )}
         </div>
       </main>
 

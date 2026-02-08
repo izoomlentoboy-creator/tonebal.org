@@ -14,6 +14,7 @@ import {
   normalizeAccessCode,
 } from "./utils/accessCode.js";
 import { createPayment, getPaymentStatus } from "./services/yookassa.js";
+import bcrypt from "bcryptjs";
 import nosologiesData from "../shared/nosologies.json" with { type: "json" };
 
 // Type for nosology data
@@ -355,10 +356,24 @@ export const appRouter = router({
         newPassword: z.string().min(6),
       }))
       .mutation(async ({ ctx, input }) => {
-        throw new TRPCError({
-          code: "NOT_IMPLEMENTED",
-          message: "Password change not available for OAuth users"
-        });
+        if (!ctx.user.passwordHash || ctx.user.loginMethod !== "email") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Смена пароля доступна только для аккаунтов с email"
+          });
+        }
+
+        const valid = await bcrypt.compare(input.currentPassword, ctx.user.passwordHash);
+        if (!valid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Неверный текущий пароль"
+          });
+        }
+
+        const newHash = await bcrypt.hash(input.newPassword, 10);
+        await db.updateUserPassword(ctx.user.id, newHash);
+        return { success: true };
       }),
 
     deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
