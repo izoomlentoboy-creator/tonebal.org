@@ -8,6 +8,14 @@ import { useState, useEffect, useRef } from "react";
 
 type AuthMode = "login" | "register" | "register-code" | "forgot-password" | "reset-password";
 
+async function parseJsonSafe(res: globalThis.Response) {
+  try {
+    return await res.json();
+  } catch {
+    return { error: "Ошибка сервера. Попробуйте позже." };
+  }
+}
+
 export default function Login() {
   const { isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
@@ -86,7 +94,7 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
 
       if (!res.ok) {
         setError(data.error || "Ошибка отправки кода");
@@ -116,7 +124,7 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name, code, emailConsent }),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
 
       if (!res.ok) {
         setError(data.error || "Ошибка регистрации");
@@ -143,7 +151,7 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
 
       if (!res.ok) {
         setError(data.error || "Ошибка отправки");
@@ -173,7 +181,7 @@ export default function Login() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
         if (!res.ok) {
           setError(data.error || "Ошибка входа");
           return;
@@ -185,7 +193,7 @@ export default function Login() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
         });
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
         if (!res.ok) {
           setError(data.error || "Ошибка");
           return;
@@ -197,7 +205,7 @@ export default function Login() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: resetToken, password }),
         });
-        const data = await res.json();
+        const data = await parseJsonSafe(res);
         if (!res.ok) {
           setError(data.error || "Ошибка сброса пароля");
           return;
