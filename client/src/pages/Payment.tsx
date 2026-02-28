@@ -1,8 +1,9 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Check, CreditCard, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, Gift, Loader2, Sparkles } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
@@ -25,17 +26,53 @@ export default function Payment() {
   const utils = trpc.useUtils();
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("yearly");
+  const [promoCode, setPromoCode] = useState("");
+  const [promoStatus, setPromoStatus] = useState<{ valid: boolean; message: string; planLabel?: string } | null>(null);
+  const [isPromoOpen, setIsPromoOpen] = useState(false);
 
   const { data: subscription } = trpc.subscription.getMy.useQuery();
   const { data: paymentInfo } = trpc.payment.getInfo.useQuery();
 
   // Цены подписок (из сервера или дефолт)
-  const monthlyPrice = paymentInfo?.price ?? 2500;
+  const monthlyPrice = paymentInfo?.price ?? 1500;
   const monthlyDays = paymentInfo?.days ?? 30;
-  const yearlyPrice = paymentInfo?.yearlyPrice ?? 18990;
+  const yearlyPrice = paymentInfo?.yearlyPrice ?? 11340;
   const yearlyDays = paymentInfo?.yearlyDays ?? 365;
   const savingsPercent = paymentInfo?.savingsPercent ?? 37;
-  const savingsAmount = paymentInfo?.savingsAmount ?? 11010;
+  const savingsAmount = paymentInfo?.savingsAmount ?? 6660;
+
+  const activatePromoMutation = trpc.promo.activate.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Промокод активирован! Подписка на ${data.planType === "yearly" ? "12 месяцев" : "1 месяц"}`);
+      utils.subscription.getMy.invalidate();
+      setPromoCode("");
+      setPromoStatus(null);
+      setIsPromoOpen(false);
+      setTimeout(() => setLocation("/profile"), 1500);
+    },
+    onError: (error) => {
+      setPromoStatus({ valid: false, message: error.message });
+    },
+  });
+
+  const handlePromoValidate = async () => {
+    if (!promoCode.trim()) return;
+    try {
+      const result = await utils.client.promo.validate.query({ code: promoCode.trim() });
+      if (result.valid) {
+        setPromoStatus({ valid: true, message: `Промокод на ${result.planLabel}`, planLabel: result.planLabel });
+      } else {
+        setPromoStatus({ valid: false, message: result.error || "Неверный промокод" });
+      }
+    } catch {
+      setPromoStatus({ valid: false, message: "Ошибка проверки промокода" });
+    }
+  };
+
+  const handlePromoActivate = () => {
+    if (!promoCode.trim()) return;
+    activatePromoMutation.mutate({ code: promoCode.trim() });
+  };
 
   const createPaymentMutation = trpc.payment.createPayment.useMutation({
     onSuccess: (data) => {
@@ -252,6 +289,74 @@ export default function Payment() {
             <p className="text-xs text-muted-foreground text-center">
               Безопасная оплата через ЮKassa
             </p>
+
+            {/* Promo Code Section */}
+            <div className="border-t pt-4">
+              <button
+                type="button"
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full justify-center"
+                onClick={() => setIsPromoOpen(!isPromoOpen)}
+              >
+                <Gift className="h-4 w-4" />
+                Есть промокод?
+              </button>
+
+              {isPromoOpen && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Введите промокод"
+                      value={promoCode}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value.toUpperCase());
+                        setPromoStatus(null);
+                      }}
+                      className="font-mono tracking-wider"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePromoValidate}
+                      disabled={!promoCode.trim() || activatePromoMutation.isPending}
+                      className="shrink-0"
+                    >
+                      Проверить
+                    </Button>
+                  </div>
+
+                  {promoStatus && (
+                    <div className={`text-sm px-3 py-2 rounded-md ${
+                      promoStatus.valid
+                        ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                        : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+                    }`}>
+                      {promoStatus.message}
+                    </div>
+                  )}
+
+                  {promoStatus?.valid && (
+                    <Button
+                      className="w-full"
+                      variant="default"
+                      onClick={handlePromoActivate}
+                      disabled={activatePromoMutation.isPending}
+                    >
+                      {activatePromoMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Активация...
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="h-4 w-4 mr-2" />
+                          Активировать промокод
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Benefits Card */}

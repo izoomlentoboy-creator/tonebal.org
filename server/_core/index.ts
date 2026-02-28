@@ -119,6 +119,13 @@ async function startServer() {
     serveStatic(app);
   }
 
+  // Seed promo codes if the table is empty
+  try {
+    await db.seedPromoCodesIfEmpty();
+  } catch (e) {
+    console.error("[Seed] Failed to seed promo codes:", e);
+  }
+
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
 

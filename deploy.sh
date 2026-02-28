@@ -38,4 +38,5 @@ pm2 restart tonebal --update-env
 
 echo ""
 echo "=== Deploy complete ==="
+echo "Promo codes will be auto-seeded on first server startup."
 echo "Email auth should now be available at /login"
