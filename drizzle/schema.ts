@@ -136,3 +136,22 @@ export const userDirections = pgTable(
 
 export type UserDirection = typeof userDirections.$inferSelect;
 export type InsertUserDirection = typeof userDirections.$inferInsert;
+
+/**
+ * Promo codes table - stores generated promo codes for free subscription activation
+ * Generated using HMAC-SHA256 with "ElizaAirat" key
+ */
+export const promoCodes = pgTable("promo_codes", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 20 }).notNull().unique(),
+  planType: varchar("plan_type", { length: 10 }).notNull(), // "monthly" | "yearly"
+  maxUses: integer("max_uses").default(1).notNull(),
+  usedCount: integer("used_count").default(0).notNull(),
+  usedByUserId: integer("used_by_user_id"),
+  isActive: boolean("is_active").default(true).notNull(),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = typeof promoCodes.$inferInsert;

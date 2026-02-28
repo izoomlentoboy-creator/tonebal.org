@@ -14,6 +14,7 @@ import {
   normalizeAccessCode,
 } from "./utils/accessCode.js";
 import { createPayment, getPaymentStatus } from "./services/yookassa.js";
+import { normalizePromoCode, isValidPromoFormat } from "./utils/promoCode.js";
 import bcrypt from "bcryptjs";
 import nosologiesData from "../shared/nosologies.json" with { type: "json" };
 
@@ -398,9 +399,9 @@ export const appRouter = router({
     // Получить информацию о подписках
     getInfo: publicProcedure.query(() => {
       // Рассчитываем выгоду годовой подписки
-      const monthlyYearCost = ENV.subscriptionPrice * 12; // 30000₽
-      const yearlyCost = ENV.subscriptionYearlyPrice; // 18990₽
-      const savings = monthlyYearCost - yearlyCost; // 11010₽
+      const monthlyYearCost = ENV.subscriptionPrice * 12; // 18000₽
+      const yearlyCost = ENV.subscriptionYearlyPrice; // 11340₽
+      const savings = monthlyYearCost - yearlyCost; // 6660₽
       const savingsPercent = Math.round((savings / monthlyYearCost) * 100); // 37%
 
       return {
@@ -602,6 +603,109 @@ export const appRouter = router({
         }
 
         return { status: "ok" };
+      }),
+  }),
+
+  // Promo Codes
+  promo: router({
+    // Валидация промокода (без активации)
+    validate: publicProcedure
+      .input(z.object({ code: z.string() }))
+      .query(async ({ input }) => {
+        const normalized = normalizePromoCode(input.code);
+
+        if (!isValidPromoFormat(normalized)) {
+          return { valid: false, error: "Неверный формат промокода" };
+        }
+
+        const promoCode = await db.getPromoCodeByCode(normalized);
+        if (!promoCode) {
+          return { valid: false, error: "Промокод не найден" };
+        }
+
+        if (!promoCode.isActive) {
+          return { valid: false, error: "Промокод деактивирован" };
+        }
+
+        if (promoCode.expiresAt && new Date(promoCode.expiresAt) < new Date()) {
+          return { valid: false, error: "Срок действия промокода истёк" };
+        }
+
+        if (promoCode.usedCount >= promoCode.maxUses) {
+          return { valid: false, error: "Промокод уже использован" };
+        }
+
+        const planLabel = promoCode.planType === "yearly" ? "12 месяцев" : "1 месяц";
+        const days = promoCode.planType === "yearly" ? 365 : 30;
+
+        return {
+          valid: true,
+          planType: promoCode.planType,
+          planLabel,
+          days,
+        };
+      }),
+
+    // Активация промокода (создаёт подписку без оплаты)
+    activate: protectedProcedure
+      .input(z.object({ code: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const normalized = normalizePromoCode(input.code);
+
+        if (!isValidPromoFormat(normalized)) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Неверный формат промокода" });
+        }
+
+        const promoCode = await db.getPromoCodeByCode(normalized);
+        if (!promoCode) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Промокод не найден" });
+        }
+
+        if (!promoCode.isActive) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Промокод деактивирован" });
+        }
+
+        if (promoCode.expiresAt && new Date(promoCode.expiresAt) < new Date()) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Срок действия промокода истёк" });
+        }
+
+        if (promoCode.usedCount >= promoCode.maxUses) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Промокод уже использован" });
+        }
+
+        const plan = promoCode.planType as "monthly" | "yearly";
+        const days = plan === "yearly" ? ENV.subscriptionYearlyDays : ENV.subscriptionDays;
+
+        // Проверяем существующую подписку для продления
+        const existingSubscription = await db.getActiveSubscription(ctx.user.id);
+        const baseDate = existingSubscription?.expiresAt;
+
+        // Создаём подписку
+        const accessCode = generateAccessCode(plan);
+        const expiresAt = calculateExpiryDate(days, baseDate);
+
+        await db.createSubscription({
+          userId: ctx.user.id,
+          paymentId: `promo:${normalized}`,
+          accessCode,
+          expiresAt,
+          isActive: 1,
+        });
+
+        // Помечаем промокод как использованный
+        await db.markPromoCodeUsed(promoCode.id, ctx.user.id);
+
+        const isRenewal = !!existingSubscription;
+        console.log(`[Promo] Subscription ${isRenewal ? 'renewed' : 'activated'} for user ${ctx.user.id} via promo ${normalized}, code: ${accessCode}, days: ${days}`);
+
+        return {
+          success: true,
+          accessCode,
+          expiresAt: expiresAt.toISOString(),
+          daysRemaining: days,
+          planType: plan,
+          isRenewal,
+        };
       }),
   }),
 

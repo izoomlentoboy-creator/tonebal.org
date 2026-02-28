@@ -16,6 +16,8 @@ import {
   InsertUserDirection,
   emailTokens,
   InsertEmailToken,
+  promoCodes,
+  InsertPromoCode,
 } from "../drizzle/schema.js";
 import { ENV } from './_core/env.js';
 
@@ -688,4 +690,45 @@ export async function getActivityStreak(userId: number, timezone: string): Promi
   }
 
   return streak;
+}
+
+// Promo Codes
+export async function getPromoCodeByCode(code: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(promoCodes)
+    .where(eq(promoCodes.code, code))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createPromoCode(data: InsertPromoCode) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(promoCodes).values(data);
+}
+
+export async function createPromoCodes(codes: InsertPromoCode[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(promoCodes).values(codes);
+}
+
+export async function markPromoCodeUsed(codeId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(promoCodes)
+    .set({
+      usedCount: sql`${promoCodes.usedCount} + 1`,
+      usedByUserId: userId,
+    })
+    .where(eq(promoCodes.id, codeId));
 }
