@@ -34,12 +34,12 @@ export default function Payment() {
   const { data: paymentInfo } = trpc.payment.getInfo.useQuery();
 
   // Цены подписок (из сервера или дефолт)
-  const monthlyPrice = paymentInfo?.price ?? 2500;
+  const monthlyPrice = paymentInfo?.price ?? 1500;
   const monthlyDays = paymentInfo?.days ?? 30;
-  const yearlyPrice = paymentInfo?.yearlyPrice ?? 18990;
+  const yearlyPrice = paymentInfo?.yearlyPrice ?? 11340;
   const yearlyDays = paymentInfo?.yearlyDays ?? 365;
   const savingsPercent = paymentInfo?.savingsPercent ?? 37;
-  const savingsAmount = paymentInfo?.savingsAmount ?? 11010;
+  const savingsAmount = paymentInfo?.savingsAmount ?? 6660;
 
   const activatePromoMutation = trpc.promo.activate.useMutation({
     onSuccess: (data) => {

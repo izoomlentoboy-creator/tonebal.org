@@ -399,9 +399,9 @@ export const appRouter = router({
     // Получить информацию о подписках
     getInfo: publicProcedure.query(() => {
       // Рассчитываем выгоду годовой подписки
-      const monthlyYearCost = ENV.subscriptionPrice * 12; // 18000₽
+      const monthlyYearCost = ENV.subscriptionPrice * 12; // 18000₽ (1500 * 12)
       const yearlyCost = ENV.subscriptionYearlyPrice; // 11340₽
-      const savings = monthlyYearCost - yearlyCost; // 6660₽
+      const savings = monthlyYearCost - yearlyCost; // 6660₽ (18000 - 11340)
       const savingsPercent = Math.round((savings / monthlyYearCost) * 100); // 37%
 
       return {

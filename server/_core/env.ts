@@ -12,9 +12,9 @@ export const ENV = {
   yookassaSecretKey: process.env.YOOKASSA_SECRET_KEY ?? "test_*g-9MajwhhX704_hx3udBkn0YAoiMZCE65nmEMeumcsdI",
   baseUrl: process.env.BASE_URL ?? "https://tonebal.org",
   // Subscription settings - monthly
-  subscriptionPrice: 2500, // рублей
+  subscriptionPrice: 1500, // рублей
   subscriptionDays: 30,
   // Subscription settings - yearly (выгода 37%)
-  subscriptionYearlyPrice: 18990, // рублей (2500 * 12 * 0.63 ≈ 18990)
+  subscriptionYearlyPrice: 11340, // рублей (1500 * 12 * 0.63 = 11340)
   subscriptionYearlyDays: 365,
 };

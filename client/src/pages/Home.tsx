@@ -611,7 +611,7 @@ export default function Home() {
             {/* Monthly */}
             <div className="bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-6">
               <div className="text-lg font-bold mb-2">Месячная подписка</div>
-              <div className="text-3xl font-bold mb-4">2 500 <span className="text-base font-normal text-slate-400">₽/мес</span></div>
+              <div className="text-3xl font-bold mb-4">1 500 <span className="text-base font-normal text-slate-400">₽/мес</span></div>
               <ul className="space-y-2 text-sm text-slate-300 mb-6">
                 <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-400" /> Все 10 программ</li>
                 <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-400" /> Код для iOS приложения</li>
@@ -628,12 +628,12 @@ export default function Home() {
                 -37%
               </div>
               <div className="text-lg font-bold mb-2">Годовая подписка</div>
-              <div className="text-3xl font-bold mb-1">18 990 <span className="text-base font-normal text-white/70">₽/год</span></div>
-              <div className="text-sm text-white/70 mb-4">~1 583 ₽/мес</div>
+              <div className="text-3xl font-bold mb-1">11 340 <span className="text-base font-normal text-white/70">₽/год</span></div>
+              <div className="text-sm text-white/70 mb-4">~945 ₽/мес</div>
               <ul className="space-y-2 text-sm text-white/90 mb-6">
                 <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-white" /> Все 10 программ</li>
                 <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-white" /> Код для iOS приложения</li>
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-white" /> Экономия 11 010 ₽</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-white" /> Экономия 6 660 ₽</li>
               </ul>
               <Button className="w-full bg-white text-[#7C3AED] hover:bg-white/90" asChild>
                 <Link href="/payment">Оформить со скидкой</Link>
