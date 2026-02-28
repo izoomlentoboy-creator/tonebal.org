@@ -568,10 +568,16 @@ export default function Profile() {
                   </li>
                 ))}
               </ul>
-              <Button variant="secondary" className="w-full rounded-xl">
-                <Download className="h-4 w-4 mr-2" />
-                Скачать из App Store
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button variant="secondary" className="w-full rounded-xl">
+                  <Download className="h-4 w-4 mr-2" />
+                  Скачать из App Store
+                </Button>
+                <Button variant="secondary" className="w-full rounded-xl">
+                  <Download className="h-4 w-4 mr-2" />
+                  Скачать из Google Play
+                </Button>
+              </div>
             </motion.div>
 
             {/* Email Notifications */}

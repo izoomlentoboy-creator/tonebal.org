@@ -543,9 +543,14 @@ export default function Home() {
 
           <div className="text-center mt-10">
             <p className="text-sm text-slate-500 mb-4">Используйте код из личного кабинета для активации подписки в приложении</p>
-            <Button variant="outline" size="lg">
-              <Download className="mr-2 h-5 w-5" /> Скачать из App Store
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button variant="outline" size="lg">
+                <Download className="mr-2 h-5 w-5" /> Скачать из App Store
+              </Button>
+              <Button variant="outline" size="lg">
+                <Download className="mr-2 h-5 w-5" /> Скачать из Google Play
+              </Button>
+            </div>
           </div>
         </div>
       </section>

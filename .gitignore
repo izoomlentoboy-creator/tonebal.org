@@ -35,3 +35,15 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Android build artifacts
+android/app/build/
+android/.gradle/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+android/capacitor-android/build/
+android/local.properties
+*.apk
+
+# Capacitor generated web assets (synced from dist/public)
+android/app/src/main/assets/public/

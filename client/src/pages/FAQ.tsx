@@ -60,7 +60,7 @@ const faqItems = [
     questions: [
       {
         q: "Где скачать приложение?",
-        a: "Приложение ToneBalance доступно в App Store для устройств iOS (iPhone, iPad). Поддерживаются устройства с iOS 16 и выше."
+        a: "Приложение ToneBalance доступно в App Store для устройств iOS (iPhone, iPad) и в Google Play для устройств Android. Поддерживаются устройства с iOS 16+ и Android 7.0+."
       },
       {
         q: "Как активировать подписку в приложении?",
