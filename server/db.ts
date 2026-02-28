@@ -765,6 +765,28 @@ export async function seedPromoCodesIfEmpty() {
     { code: 'Y-VC8XHFVF', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
     { code: 'Y-7BV8WH9F', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
     { code: 'Y-NQF34NZ5', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    // Batch v2 — monthly
+    { code: 'M-KDMEFXBW', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-MZNSHJ4E', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-XM3CGTZX', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-5MH98R26', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-J8DY3U6Y', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-EZTBJ4Z8', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-88X6N3GE', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-RUAH5MGA', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-3ZC99H9A', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'M-XHADHRFW', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
+    // Batch v2 — yearly
+    { code: 'Y-RCSJTYNJ', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-853WR3VX', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-YARKFMMD', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-3MWYR9ZH', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-BSQJ62QD', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-HD4YACPM', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-74HNYED9', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-D2VJHMWZ', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-PSV4EF8A', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
+    { code: 'Y-99E3RN8J', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
   ];
 
   await db.insert(promoCodes).values(seedCodes);
