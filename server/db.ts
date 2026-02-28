@@ -734,15 +734,12 @@ export async function markPromoCodeUsed(codeId: number, userId: number) {
 }
 
 /**
- * Seed promo codes if the table is empty.
- * Called on server startup to ensure codes from 0002_seed_promo_codes.sql exist.
+ * Seed promo codes — inserts any missing codes on server startup.
+ * Uses ON CONFLICT DO NOTHING so it's safe to run repeatedly.
  */
 export async function seedPromoCodesIfEmpty() {
   const db = await getDb();
   if (!db) return;
-
-  const existing = await db.select({ id: promoCodes.id }).from(promoCodes).limit(1);
-  if (existing.length > 0) return; // already seeded
 
   const seedCodes: InsertPromoCode[] = [
     { code: 'M-DCB5P7TC', planType: 'monthly', maxUses: 1, usedCount: 0, isActive: true },
@@ -789,6 +786,6 @@ export async function seedPromoCodesIfEmpty() {
     { code: 'Y-99E3RN8J', planType: 'yearly', maxUses: 1, usedCount: 0, isActive: true },
   ];
 
-  await db.insert(promoCodes).values(seedCodes);
-  console.log(`[Seed] Inserted ${seedCodes.length} promo codes`);
+  await db.insert(promoCodes).values(seedCodes).onConflictDoNothing({ target: promoCodes.code });
+  console.log(`[Seed] Synced ${seedCodes.length} promo codes (new ones inserted)`);
 }
