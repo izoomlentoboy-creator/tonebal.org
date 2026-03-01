@@ -424,7 +424,7 @@ export default function Home() {
           <h2 className="text-2xl lg:text-4xl font-bold text-center mb-10">Как начать?</h2>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <StepCard number="1" title="Войдите через VK" text="Быстрая регистрация через ВКонтакте. Это займет несколько секунд." />
-            <StepCard number="2" title="Выберите программу" text="10 специализированных программ для разных нозологий голоса." />
+            <StepCard number="2" title="Выберите программу" text="11 специализированных программ для разных нозологий голоса." />
             <StepCard number="3" title="Начните занятия" text="Следуйте персональному плану упражнений 10-15 минут в день." />
           </div>
         </div>
@@ -556,7 +556,7 @@ export default function Home() {
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-2xl lg:text-4xl font-bold text-slate-900 mb-4">Наши программы</h2>
             <p className="text-slate-500 text-base">
-              10 специализированных программ. 2 программы доступны бесплатно после регистрации.
+              11 специализированных программ. 2 программы доступны бесплатно после регистрации.
             </p>
           </div>
 
@@ -603,7 +603,7 @@ export default function Home() {
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-2xl lg:text-4xl font-bold mb-4">Простое ценообразование</h2>
             <p className="text-slate-400 text-base">
-              2 программы бесплатно. Полный доступ ко всем 10 программам — по подписке.
+              2 программы бесплатно. Полный доступ ко всем 11 программам — по подписке.
             </p>
           </div>
 
@@ -613,7 +613,7 @@ export default function Home() {
               <div className="text-lg font-bold mb-2">Месячная подписка</div>
               <div className="text-3xl font-bold mb-4">1 500 <span className="text-base font-normal text-slate-400">₽/мес</span></div>
               <ul className="space-y-2 text-sm text-slate-300 mb-6">
-                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-400" /> Все 10 программ</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-400" /> Все 11 программ</li>
                 <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-400" /> Код для iOS приложения</li>
                 <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-400" /> Календарь и статистика</li>
               </ul>

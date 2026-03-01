@@ -157,7 +157,7 @@ export default function Payment() {
             {hasSubscription ? "Продлить подписку" : "Получить полный доступ"}
           </h1>
           <p className="text-xl text-muted-foreground">
-            Разблокируйте все 8 premium программ реабилитации
+            Разблокируйте все 9 premium программ реабилитации
           </p>
         </div>
 
@@ -249,11 +249,11 @@ export default function Payment() {
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
                   <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm">Доступ ко всем 8 premium программам</p>
+                  <p className="text-sm">Доступ ко всем 9 premium программам</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm">133 профессиональных урока</p>
+                  <p className="text-sm">142 профессиональных урока</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
@@ -397,6 +397,10 @@ export default function Payment() {
                 <div>
                   <h3 className="font-semibold mb-2">⚠️ Узелки голосовых складок</h3>
                   <p className="text-sm text-muted-foreground">20 уроков SOVT и резонансной терапии</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">👄 Открытый рот</h3>
+                  <p className="text-sm text-muted-foreground">9 уроков миофункциональной терапии</p>
                 </div>
               </CardContent>
             </Card>
