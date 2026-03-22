@@ -9,6 +9,25 @@ import { getLoginUrl } from "./const";
 import "./index.css";
 
 const queryClient = new QueryClient();
+const API_TIMEOUT_MS = 8000;
+
+const fetchWithTimeout = async (
+  input: RequestInfo | URL,
+  init?: RequestInit,
+) => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, {
+      ...(init ?? {}),
+      credentials: "include",
+      signal: init?.signal ?? controller.signal,
+    });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+};
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
@@ -43,10 +62,7 @@ const trpcClient = trpc.createClient({
       url: "/api/trpc",
       transformer: superjson,
       fetch(input, init) {
-        return globalThis.fetch(input, {
-          ...(init ?? {}),
-          credentials: "include",
-        });
+        return fetchWithTimeout(input, init);
       },
     }),
   ],
